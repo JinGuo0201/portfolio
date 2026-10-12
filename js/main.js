@@ -68,6 +68,30 @@
     revealEls.forEach(function (el) { el.classList.add("visible"); });
   }
 
+  /* ---------------- 跨页锚点精确重定位 ----------------
+     浏览器原生锚点滚动发生在字体加载前，字体替换会导致布局收缩、
+     目标卡片位置偏移；通过多重触发（load / 字体就绪 / 延迟重试）
+     反复对齐，最终将目标卡片顶部稳定在 dock 栏下方 8px 处。
+     注意：须置于表单段的提前 return 之前，保证所有页面都能执行 */
+  if (location.hash) {
+    var anchorTarget = document.getElementById(location.hash.slice(1));
+    if (anchorTarget) {
+      var alignAnchor = function () {
+        var header = document.getElementById("site-header");
+        var offset = (header ? header.offsetHeight : 56) + 8;
+        var top = anchorTarget.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo(0, top);
+      };
+      window.addEventListener("load", function () {
+        setTimeout(alignAnchor, 150);
+        setTimeout(alignAnchor, 600);
+      });
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { setTimeout(alignAnchor, 50); });
+      }
+    }
+  }
+
   /* ==========================================================================
      联系表单：校验 → 打包 → 投递至 RECIPIENT_EMAIL
      ========================================================================== */

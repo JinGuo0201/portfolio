@@ -426,9 +426,9 @@ a.pub-card {
 
 a.pub-card:hover .pub-title { color: var(--ring); }
 
-/* 跨页锚点定位时预留 sticky header 高度 */
-.research-title[id] {
-  scroll-margin-top: 4.5rem;
+/* 跨页锚点定位：目标为玻璃卡片顶部，预留 dock 栏高度 + 几px 间隙 */
+.research-card[id] {
+  scroll-margin-top: 4rem;
 }
 
 .section-footer-link { margin-top: 1.5rem; }
@@ -546,7 +546,12 @@ a.pub-card:hover .pub-title { color: var(--ring); }
   font-size: 1.375rem;
   font-weight: 700;
   line-height: 1.45;
-  margin: 0.875rem 0 1.5rem;
+  margin: 0.875rem 0 0.5rem;
+}
+
+/* 论文中文译名小字（英文主标题下方） */
+.research-card .pub-cn {
+  margin-bottom: 1.25rem;
 }
 
 .research-block { margin-bottom: 1.25rem; }
@@ -565,6 +570,316 @@ a.pub-card:hover .pub-title { color: var(--ring); }
 }
 
 .research-placeholder { color: var(--muted-foreground); font-style: italic; }
+
+/* 论文卡片底部链接行（查看论文按钮） */
+.research-link-row {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* 核心图件 Viewer：左图舞台 | 竖直调度线 | 右侧文字描述 */
+.fig-viewer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) 26px minmax(0, 1fr);
+  gap: 0 0.9rem;
+  align-items: stretch;
+}
+
+.fig-stage-wrap { min-width: 0; }
+
+/* 舞台：上/下各留 44px 露出相邻图的模糊边缘 */
+.fig-stage {
+  position: relative;
+  height: calc(clamp(280px, 32vw, 430px) + 88px);
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #101013;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+}
+
+.fig-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44px;
+  height: clamp(280px, 32vw, 430px);
+  transition: transform 0.5s ease;
+  will-change: transform;
+}
+
+.fig-item {
+  position: relative;
+  height: clamp(280px, 32vw, 430px);
+  filter: blur(10px) brightness(0.45);
+  transition: filter 0.5s ease;
+}
+
+.fig-item.is-main {
+  filter: none;
+}
+
+.fig-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* 瓦片动效层（飘散/聚拢） */
+.fig-tiles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.fig-tile {
+  position: absolute;
+  display: block;
+  background-repeat: no-repeat;
+  will-change: transform, opacity;
+}
+
+/* 版权小字 */
+.fig-copyright {
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* 竖直调度线 + 节点 */
+.fig-rail {
+  position: relative;
+  width: 26px;
+}
+
+.fig-rail::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 44px;
+  bottom: 44px;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0.05));
+}
+
+.rail-dot {
+  position: absolute;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: #18181b;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  z-index: 2;
+}
+
+.rail-dot:hover { transform: translate(-50%, -50%) scale(1.35); }
+
+.rail-dot.active {
+  background: var(--foreground);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.55);
+}
+
+/* 右侧文字描述 */
+.fig-desc {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 44px 0;
+  min-width: 0;
+}
+
+.fig-desc-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.fig-desc-text {
+  font-size: 0.8125rem;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+}
+
+.fig-desc-index {
+  font-size: 0.75rem;
+  color: rgba(161, 161, 170, 0.6);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- PDF.js 内置阅读器弹窗 ---------- */
+.pdf-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+}
+
+.pdf-modal.open { display: block; }
+
+.pdf-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.pdf-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, calc(100vw - 2.5rem));
+  max-height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
+  border-radius: calc(var(--radius) + 4px);
+  overflow: hidden;
+}
+
+.pdf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.pdf-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pdf-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-white);
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.pdf-close:hover { background: var(--foreground); color: #000; }
+.pdf-close svg { width: 16px; height: 16px; }
+
+.pdf-body {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.pdf-canvas-wrap {
+  position: relative;
+}
+
+.pdf-canvas {
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
+}
+
+/* PDF 上层透明拦截层：拦截右键“另存为”等简单获取 PDF 的途径 */
+.pdf-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: transparent;
+  cursor: default;
+}
+
+/* file:// 降级：浏览器原生查看器（iframe） */
+.pdf-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.pdf-modal.native-viewer .pdf-body { flex: none; height: calc(100vh - 10rem); }
+
+.pdf-modal.native-viewer .pdf-footer { display: none; }
+
+.pdf-error {
+  text-align: center;
+  color: var(--muted-foreground);
+  padding: 2rem 1rem;
+  font-size: 0.875rem;
+}
+
+.pdf-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.pdf-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-white);
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.pdf-nav-btn:hover { background: var(--foreground); color: #000; }
+.pdf-nav-btn svg { width: 17px; height: 17px; }
+
+.pdf-page-ind {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  min-width: 4.5rem;
+  text-align: center;
+}
+
+/* 移动端：舞台整行，调度线与描述纵向堆叠 */
+@media (max-width: 48em) {
+  .fig-viewer {
+    grid-template-columns: 1fr 26px;
+  }
+
+  .fig-desc {
+    grid-column: 1 / -1;
+    padding: 0.9rem 0 0;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 0.9rem;
+  }
+
+  .fig-stage { height: calc(240px + 88px); }
+  .fig-strip, .fig-item { height: 240px; }
+}
 
 /* ---------- 项目展示板块 ---------- */
 .showcase {
