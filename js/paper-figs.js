@@ -218,7 +218,14 @@
 
       var rect = stage.getBoundingClientRect();
 
-      /* 阶段一：当前图瓦片化后飘散消散 */
+      /* 底图先行切换为目标图的高斯模糊背景：与瓦片飘散同帧发生，
+         消除原图残留至聚拢阶段才瞬切所造成的割裂感 */
+      index = target;
+      place(true);
+      var nextItem = strip.children[index];
+      nextItem.classList.add("is-backdrop");
+
+      /* 阶段一：当前图瓦片化后飘散消散（瓦片已构建，不受底图切换影响） */
       var scatterOverlay = buildTiles(curFig, rect);
       stage.appendChild(scatterOverlay);
       var scatterTiles = scatterOverlay.children;
@@ -235,10 +242,6 @@
 
       /* 阶段二：目标图瓦片自四方聚拢拼合 */
       setTimeout(function () {
-        // 直接将图片条置于目标位（藏于瓦片之下）
-        index = target;
-        place(true);
-
         var gatherOverlay = buildTiles(tgtFig, rect);
         stage.appendChild(gatherOverlay);
         var gatherTiles = gatherOverlay.children;
@@ -256,8 +259,13 @@
 
         setTimeout(function () {
           scatterOverlay.remove();
-          gatherOverlay.remove();
-          animating = false;
+          /* 聚拢完成：底图自模糊态清晰化（0.5s），与瓦片画面重合 */
+          nextItem.classList.remove("is-backdrop");
+          setTimeout(function () {
+            /* 底图清晰化完成后移除瓦片层，全程无跳变 */
+            gatherOverlay.remove();
+            animating = false;
+          }, 520);
         }, 750);
       }, 480);
     }

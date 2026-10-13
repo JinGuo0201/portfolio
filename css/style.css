@@ -613,11 +613,19 @@ a.pub-card:hover .pub-title { color: var(--ring); }
   position: relative;
   height: clamp(280px, 32vw, 430px);
   filter: blur(10px) brightness(0.45);
-  transition: filter 0.5s ease;
+  transition: filter 0.5s ease, transform 0.5s ease;
 }
 
 .fig-item.is-main {
   filter: none;
+}
+
+/* 瓦片过渡期间的目标图高斯模糊背景态：
+   在瓦片飘散前底图即切换为目标图的模糊背景，聚拢完成后再清晰化；
+   scale 放大消除 blur 边缘泛白缝 */
+.fig-item.is-backdrop {
+  filter: blur(22px) brightness(0.5) saturate(1.1);
+  transform: scale(1.06);
 }
 
 .fig-item img {
@@ -890,6 +898,7 @@ a.pub-card:hover .pub-title { color: var(--ring); }
 }
 
 .showcase-banner {
+  position: relative;
   aspect-ratio: 21 / 9;
   width: 100%;
   overflow: hidden;
@@ -897,9 +906,24 @@ a.pub-card:hover .pub-title { color: var(--ring); }
 }
 
 .showcase-banner img {
+  display: block;
   width: 100%;
   height: 100%;
+}
+
+/* 主图形状与 21:9 banner 不匹配时：本图放大模糊作同色系背景，
+   原图以 contain 完整居中（不裁剪） */
+.showcase-banner .banner-bg {
+  position: absolute;
+  inset: 0;
   object-fit: cover;
+  filter: blur(26px) brightness(0.55) saturate(1.15);
+  transform: scale(1.15);
+}
+
+.showcase-banner .banner-main {
+  position: relative;
+  object-fit: contain;
 }
 
 .showcase-body { padding: 2rem; }
@@ -938,18 +962,21 @@ a.pub-card:hover .pub-title { color: var(--ring); }
   .showcase-gallery { grid-template-columns: repeat(3, 1fr); }
 }
 
-.placeholder-slot {
+/* 成果小图（已按 4:3 居中裁剪，cover 仅作容器适配） */
+.gallery-item {
+  margin: 0;
   aspect-ratio: 4 / 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed #3f3f46;          /* zinc-700 */
+  overflow: hidden;
   border-radius: var(--radius);
-  color: var(--muted-foreground);
-  font-size: 0.875rem;
-  text-align: center;
-  padding: 1rem;
-  background: rgba(24, 24, 27, 0.3);
+  border: 1px solid var(--border-soft);
+  background: #101013;
+}
+
+.gallery-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* ---------- About ---------- */
@@ -1568,6 +1595,137 @@ a.pub-card:hover .pub-title { color: var(--ring); }
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
 }
 
+/* ---------- 居中卡 3D 翻转：正面图片 / 背面技能介绍 ---------- */
+/* 翻转透视：挂在外层 slide 上，轮播位移与倾斜互不影响 */
+.skill-slide { perspective: 1600px; }
+
+/* 翻转容器：preserve-3d 保证正背面同处一个三维空间 */
+.slide-flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.34, 0.08, 0.18, 1);
+  will-change: transform;
+}
+
+.skill-slide.is-flipped .slide-flip { transform: rotateY(180deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-flip { transition: none; }
+}
+
+/* 正/背面：backface-visibility 负责翻转过程中的显隐 */
+.slide-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* 正面自带底色与边框（随卡片一起翻转，slide 本体保持透明，
+   翻转时不再露出静止黑框，实现整卡自主翻转） */
+.slide-front {
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.slide-back { transform: rotateY(180deg); }
+
+/* 正面右下角的“可翻转”提示（仅居中卡显示） */
+.flip-hint {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(24, 24, 27, 0.5);
+  color: rgba(228, 228, 231, 0.92);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.flip-hint svg { width: 14px; height: 14px; }
+.skill-slide.is-featured .flip-hint { opacity: 0.9; }
+.skill-slide.is-flipped .flip-hint { opacity: 0; }
+
+/* 背面版式：静态玻璃面板（轮播页禁用 backdrop-filter，以实色渐变+内阴影模拟玻璃） */
+.slide-back {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 1.5rem 1.6rem;
+  background: linear-gradient(165deg, #212127, #141417 52%, #1b1b22);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.28),
+    inset 0 -14px 22px -14px rgba(0, 0, 0, 0.55);
+}
+
+.back-kicker {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: rgba(161, 161, 170, 0.95);
+}
+
+.back-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.back-desc {
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: rgba(228, 228, 231, 0.92);
+}
+
+.back-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+}
+
+.back-chip {
+  font-size: 0.6875rem;
+  padding: 0.24rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(212, 212, 216, 0.95);
+  white-space: nowrap;
+}
+
+.back-hint {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.6rem;
+  font-size: 0.625rem;
+  color: rgba(113, 113, 122, 0.85);
+}
+
+/* 移动端小卡（84% 宽）背面紧凑排版 */
+@media (max-width: 48em) {
+  .slide-back { padding: 0.85rem 0.95rem; gap: 0.4rem; }
+  .back-kicker { display: none; }
+  .back-title { font-size: 0.95rem; }
+  .back-desc { font-size: 0.66rem; line-height: 1.55; }
+  .back-chips { gap: 0.28rem; }
+  .back-chip { font-size: 0.56rem; padding: 0.16rem 0.42rem; }
+  .back-hint { right: 0.7rem; bottom: 0.4rem; font-size: 0.55rem; }
+}
+
 /* 技能按钮激活态（与轮播当前页同步高亮） */
 .skill-badge.active {
   background: var(--foreground);
@@ -1617,8 +1775,10 @@ a.pub-card:hover .pub-title { color: var(--ring); }
   position: absolute;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  background: #18181b;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  /* 底色与边框下沉至 .slide-front（随翻转层转动），
+     slide 本体保持透明，翻转时不残留静止黑框 */
+  background: transparent;
+  border: none;
 }
 
 /* 居中卡位（--d = 0）获得交互动画资格：聚光灯 + 边缘受压倾斜；

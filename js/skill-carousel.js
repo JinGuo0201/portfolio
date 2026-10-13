@@ -81,6 +81,7 @@
       var d = wrapped ? normalize(linear) : linear;
       offsets[i] = d;
       s.style.transform = "";             // 清除可能残留的倾斜内联变换，交回类定位
+      s.classList.remove("is-flipped");   // 切换技能时卡片一律翻回正面
 
       if (!wrapped) {
         // 正常卡片：连续滑动
@@ -134,10 +135,14 @@
     ring.className = "glass-ring";
     s.appendChild(ring);
 
-    // 点击左侧邻卡 → 整体右滑一张，它到中间；点击右侧邻卡 → 整体左滑一张
+    // 点击左侧邻卡 → 整体右滑一张，它到中间；点击右侧邻卡 → 整体左滑一张；
+    // 点击居中卡 → 3D 翻转查看该技能的详细介绍（背面），再点翻回正面
     s.addEventListener("click", function () {
       var d = offsets[i];
-      if (d === -1) {
+      if (d === 0) {
+        s.style.transform = "";               // 清除可能残留的倾斜内联变换
+        s.classList.toggle("is-flipped");
+      } else if (d === -1) {
         move(-1, 1);
       } else if (d === 1) {
         move(1, 1);
@@ -155,11 +160,14 @@
       if (!s.classList.contains("is-featured")) return;
       if (e.pointerType === "touch" || reduceMotion || lock) return;
 
-      // 边缘受压：光标一侧边缘下沉（perspective 旋转）
+      // 边缘受压：光标一侧边缘下沉（perspective 旋转）。
+      // 翻转态（背面朝前）下外层倾斜与内层 180° 翻转叠加会镜像方向，
+      // 故角度取反，保证背面的压感表现与正面完全一致。
+      var flipSign = s.classList.contains("is-flipped") ? -1 : 1;
       var px = x / rect.width;
       var py = y / rect.height;
-      var rotY = (px - 0.5) * 14;
-      var rotX = (0.5 - py) * 14;
+      var rotY = (px - 0.5) * 14 * flipSign;
+      var rotX = (0.5 - py) * 14 * flipSign;
       var dx = parseFloat(s.style.getPropertyValue("--dx")) || 0;
       s.style.transition = "transform 0.18s ease-out";
       s.style.transform =
