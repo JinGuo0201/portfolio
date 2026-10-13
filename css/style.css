@@ -1624,6 +1624,15 @@ a.pub-card:hover .pub-title { color: var(--ring); }
   overflow: hidden;
 }
 
+/* 修复移动端 Chrome/Safari 合成层缺陷：面内被单独提升为 GPU 图层的后代
+   （绝对定位 + z-index 的标签、带透明度过渡的提示等）不随父面整体剔除，
+   翻转后会以镜像形式透出背面（如技能名反向出现在右下角）。
+   对面内所有后代统一应用 backface-visibility，让合成器按各自朝向剔除。 */
+.slide-face * {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 /* 正面自带底色与边框（随卡片一起翻转，slide 本体保持透明，
    翻转时不再露出静止黑框，实现整卡自主翻转） */
 .slide-front {
