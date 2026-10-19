@@ -569,6 +569,21 @@ a.pub-card:hover .pub-title { color: var(--ring); }
   line-height: 1.75;
 }
 
+/* 公开数据集 DOI 链接（研究卡片内） */
+.data-link {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease, color 0.2s ease;
+  word-break: break-all;
+}
+
+.data-link:hover {
+  color: var(--primary-hover);
+  text-decoration-color: currentColor;
+}
+
 .research-placeholder { color: var(--muted-foreground); font-style: italic; }
 
 /* 论文卡片底部链接行（查看论文按钮） */
