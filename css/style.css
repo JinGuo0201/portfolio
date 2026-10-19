@@ -1404,6 +1404,40 @@ a.pub-card:hover .pub-title { color: var(--ring); }
 .form-field.invalid .form-error { display: block; }
 .form-field.invalid .form-input { border-color: #f87171; }
 
+/* 邮箱下方的「同时留下电话或微信」勾选框 */
+.form-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.form-check:hover { color: var(--foreground); }
+
+.form-check input {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  margin: 0;
+  accent-color: #ffffff;
+  cursor: pointer;
+}
+
+/* 勾选后展开的电话 / 微信字段：PC 双列并排，窄屏单列 */
+.form-extra-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 30em) {
+  .form-extra-grid { grid-template-columns: 1fr; gap: 0; }
+}
+
 .form-status {
   display: none;
   text-align: center;
@@ -1788,6 +1822,240 @@ a.pub-card:hover .pub-title { color: var(--ring); }
 
 @media (max-width: 30em) {
   :root { --slide-w: 84%; --slide-gap: 16px; }
+}
+
+/* ==========================================================================
+   简历页扩展栏目：会议经历 / 获奖与证书 / 学生工作经历
+   （沿用液态玻璃卡片 + 光标聚光灯高亮的整体设计语言）
+   ========================================================================== */
+
+/* ---------- 会议经历：左侧照片 · 右侧参会简介与汇报主题 ---------- */
+.meeting-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 1.75rem;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+}
+
+.meeting-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.meeting-photo {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.meeting-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.meeting-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.meeting-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.meeting-badge {
+  padding: 0.22rem 0.7rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.meeting-venue {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.meeting-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.meeting-topic-kicker {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--muted-foreground);
+  margin-bottom: 0.2rem;
+}
+
+.meeting-topic-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.meeting-summary {
+  font-size: 0.8125rem;
+  line-height: 1.8;
+  color: rgba(212, 212, 216, 0.95);
+}
+
+@media (max-width: 48em) {
+  .meeting-card { grid-template-columns: 1fr; }
+  .meeting-photos { flex-direction: row; }
+  .meeting-photo { flex: 1; }
+}
+
+@media (max-width: 30em) {
+  .meeting-photos { flex-direction: column; }
+}
+
+/* ---------- 获奖与证书：按阶段分组 ---------- */
+/* 两列等宽使分割线位于玻璃卡片正中间，本科与研究生分列两侧 */
+.awards-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+}
+
+/* 分割线两侧各留空隙：左侧本科详情与右侧研究生奖项不贴线 */
+.awards-group:first-child { padding-right: 1.75rem; }
+
+.awards-group + .awards-group {
+  border-left: 1px solid var(--border-soft);
+  padding-left: 1.75rem;
+}
+
+.awards-list {
+  display: grid;
+  gap: 0.55rem;
+  list-style: none;
+}
+
+/* 奖项与详情两端对齐：本科奖项贴玻璃左界、详情贴分割线；
+   研究生奖项贴分割线、详情贴玻璃右界 */
+.award-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.awards-stage {
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.award-name { color: var(--foreground); }
+
+.award-name::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.55);
+  margin-right: 0.55rem;
+  vertical-align: middle;
+}
+
+.award-note {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+@media (max-width: 48em) {
+  .awards-card { grid-template-columns: 1fr; }
+
+  /* 移动端单列堆叠：竖线改为两组之间的横向分割线 */
+  .awards-group:first-child { padding-right: 0; }
+
+  .awards-group + .awards-group {
+    border-left: none;
+    padding-left: 0;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-soft);
+  }
+}
+
+/* ---------- 学生工作经历 ---------- */
+.work-card {
+  padding: 1.5rem;
+  border-radius: var(--radius);
+}
+
+.work-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.work-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.work-org {
+  margin-top: 0.15rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.work-period {
+  flex-shrink: 0;
+  padding: 0.22rem 0.7rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.work-duties {
+  display: grid;
+  gap: 0.6rem;
+  list-style: none;
+}
+
+.work-duty {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: rgba(212, 212, 216, 0.95);
+}
+
+.work-duty::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 /* 轮播页说明：

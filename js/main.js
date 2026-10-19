@@ -100,6 +100,34 @@
 
   var statusEl = document.getElementById("cf-status");
   var submitBtn = document.getElementById("cf-submit");
+  var moreContact = document.getElementById("cf-more-contact");
+  var extraFields = document.getElementById("cf-extra-fields");
+
+  /* 「同时留下电话或微信」勾选框：控制额外字段的展开与收起 */
+  function syncExtraFields(show) {
+    if (show) {
+      extraFields.classList.remove("hidden");
+    } else {
+      extraFields.classList.add("hidden");
+      ["cf-phone", "cf-wechat"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.value = "";
+          setError(id, "");
+        }
+      });
+    }
+  }
+
+  if (moreContact && extraFields) {
+    moreContact.addEventListener("change", function () {
+      syncExtraFields(moreContact.checked);
+    });
+    /* 表单重置（发送成功 / mailto 回退）后 checkbox 恢复未勾选，同步收起字段 */
+    form.addEventListener("reset", function () {
+      syncExtraFields(false);
+    });
+  }
 
   function setStatus(type, text) {
     statusEl.className = "form-status show " + type;
@@ -129,10 +157,15 @@
       setError("cf-name", "");
     }
 
-    if (!formData.email.trim()) {
-      setError("cf-email", "请输入邮箱地址");
+    /* 联系方式三选一以上：邮箱、电话、微信至少填写一项；邮箱填写时需为有效格式 */
+    var email = formData.email.trim();
+    var phone = formData.phone.trim();
+    var wechat = formData.wechat.trim();
+
+    if (!email && !phone && !wechat) {
+      setError("cf-email", "请至少填写邮箱、电话或微信中的一项");
       ok = false;
-    } else if (!emailRe.test(formData.email.trim())) {
+    } else if (email && !emailRe.test(email)) {
       setError("cf-email", "请输入有效的邮箱地址");
       ok = false;
     } else {
@@ -159,15 +192,12 @@
   // 回退方案：打包内容路由到系统邮件客户端（mailto 协议）
   function mailtoFallback(formData) {
     var subject = "【主页联系表单】来自 " + formData.name + " 的留言";
-    var body = [
-      "姓名：" + formData.name,
-      "邮箱：" + formData.email,
-      "",
-      "留言内容：",
-      formData.message,
-      "",
-      "—— 发送自个人主页联系表单"
-    ].join("\n");
+    var lines = ["姓名：" + formData.name];
+    if (formData.email.trim()) lines.push("邮箱：" + formData.email.trim());
+    if (formData.phone.trim()) lines.push("电话：" + formData.phone.trim());
+    if (formData.wechat.trim()) lines.push("微信：" + formData.wechat.trim());
+    lines.push("", "留言内容：", formData.message, "", "—— 发送自个人主页联系表单");
+    var body = lines.join("\n");
 
     window.location.href = "mailto:" + RECIPIENT_EMAIL +
       "?subject=" + encodeURIComponent(subject) +
@@ -184,6 +214,8 @@
     var formData = {
       name: form.elements["name"].value,
       email: form.elements["email"].value,
+      phone: form.elements["phone"] ? form.elements["phone"].value : "",
+      wechat: form.elements["wechat"] ? form.elements["wechat"].value : "",
       message: form.elements["message"].value
     };
 
@@ -196,19 +228,26 @@
     }
 
     // 网页端直发：表单内容由 Web3Forms 代收并投递到指定邮箱
+    // 邮箱、电话、微信按实际填写情况组装，任一或多项均可
+    var payload = {
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: "【主页联系表单】来自 " + formData.name + " 的留言",
+      from_name: "个人主页联系表单",
+      姓名: formData.name,
+      留言内容: formData.message
+    };
+    if (formData.email.trim()) {
+      payload.replyto = formData.email.trim();
+      payload.联系邮箱 = formData.email.trim();
+    }
+    if (formData.phone.trim()) payload.联系电话 = formData.phone.trim();
+    if (formData.wechat.trim()) payload.微信号 = formData.wechat.trim();
+
     setSending(true);
     fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({
-        access_key: WEB3FORMS_ACCESS_KEY,
-        subject: "【主页联系表单】来自 " + formData.name + " 的留言",
-        from_name: "个人主页联系表单",
-        replyto: formData.email,
-        姓名: formData.name,
-        联系邮箱: formData.email,
-        留言内容: formData.message
-      })
+      body: JSON.stringify(payload)
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {
@@ -228,7 +267,7 @@
   });
 
   // 输入时清除对应错误提示
-  ["cf-name", "cf-email", "cf-message"].forEach(function (id) {
+  ["cf-name", "cf-email", "cf-message", "cf-phone", "cf-wechat"].forEach(function (id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener("input", function () { setError(id, ""); });
   });

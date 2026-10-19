@@ -15,7 +15,7 @@
     return; // 减弱动态效果时跳过交互增强，仅保留静态玻璃样式
   }
 
-  var GLASS_CARDS = ".overview-card, a.pub-card, .project-card, .contact-card, .contact-form-card, .research-card, .showcase, .skill-slide";
+  var GLASS_CARDS = ".overview-card, a.pub-card, .project-card, .contact-card, .contact-form-card, .research-card, .showcase, .skill-slide, .meeting-card, .awards-card, .work-card";
   var TILT_CARDS = ".overview-card, a.pub-card"; // 可点击卡片：倾斜 + 边缘光晕
   var TILT_MAX = 7; // 最大倾斜角度（度）
 

@@ -50,7 +50,6 @@
         <!-- ============ 页面标题 ============ -->
         <div class="page-hero">
           <h1 class="page-title">联系方式</h1>
-          <p class="page-subtitle">欢迎通过电话、邮箱联系我，或直接在页面留言</p>
         </div>
 
         <div class="contact-wrap">
@@ -61,7 +60,7 @@
               <div>
                 <h3 class="contact-info-title">联系我</h3>
                 <p class="contact-info-desc">
-                  我随时欢迎新的机会与有趣的项目合作。在线留言会直接发送到我的邮箱，会尽快回复！
+                  以下为本人的联络方式，右侧在线留言中填写的内容将直接发送至本人邮箱。
                 </p>
               </div>
 
@@ -104,8 +103,27 @@
 
                 <div class="form-field">
                   <label for="cf-email" class="form-label">邮箱</label>
-                  <input type="email" id="cf-email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email" />
+                  <input type="email" id="cf-email" name="email" class="form-input" placeholder="you@example.com" autocomplete="email" />
+                  <label class="form-check">
+                    <input type="checkbox" id="cf-more-contact" />
+                    <span>同时留下电话或微信</span>
+                  </label>
                   <p class="form-error" data-error-for="cf-email"></p>
+                </div>
+
+                <div class="form-extra hidden" id="cf-extra-fields">
+                  <div class="form-extra-grid">
+                    <div class="form-field">
+                      <label for="cf-phone" class="form-label">电话</label>
+                      <input type="tel" id="cf-phone" name="phone" class="form-input" placeholder="您的电话号码" autocomplete="tel" />
+                      <p class="form-error" data-error-for="cf-phone"></p>
+                    </div>
+                    <div class="form-field">
+                      <label for="cf-wechat" class="form-label">微信</label>
+                      <input type="text" id="cf-wechat" name="wechat" class="form-input" placeholder="您的微信号" />
+                      <p class="form-error" data-error-for="cf-wechat"></p>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="form-field">

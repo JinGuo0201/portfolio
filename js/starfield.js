@@ -29,7 +29,7 @@
   }
 
   function initParticles() {
-    var count = Math.min(140, Math.round((window.innerWidth * window.innerHeight) / 14000));
+    var count = Math.min(240, Math.round((window.innerWidth * window.innerHeight) / 9000));
     particles = [];
     for (var i = 0; i < count; i++) {
       particles.push({
