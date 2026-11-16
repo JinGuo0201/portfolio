@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PHDPresentation · 郭晋</title>
+<style>
+  /* ---------- 字体 ---------- */
+  @font-face{
+    font-family:"Inter";
+    src:url("assets/fonts/inter-latin.woff2") format("woff2");
+    font-weight:100 900;font-style:normal;font-display:swap;
+  }
+  @font-face{
+    font-family:"Inter";
+    src:url("assets/fonts/inter-italic.woff2") format("woff2");
+    font-weight:100 900;font-style:italic;font-display:swap;
+  }
+
+  :root{
+    --navy:#19213d;
+    --blue:#2388ff;
+    --blue-deep:#005be3;
+    --sky:#239cff;
+    --muted:#b4b9c9;
+    --faint:#6d758f;
+    --ice:#e3efff;
+    --line:#353e5c;
+    --green:#61dd75;
+    --amber:#f6b704;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:#080b13;
+    overflow:hidden;
+    font-family:"Inter","Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;
+    color:#fff;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ---------- 16:9 舞台 ---------- */
+  #stage{
+    position:absolute;left:50%;top:50%;
+    width:1920px;height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(1);
+    box-shadow:0 40px 120px rgba(0,0,0,.65);
+    background:#0b0f18;
+  }
+
+  .slide{
+    position:absolute;inset:0;overflow:hidden;
+    opacity:0;visibility:hidden;
+    transition:opacity .42s ease, transform .6s cubic-bezier(.22,.61,.36,1);
+    transform:scale(1.008);
+    will-change:opacity,transform;
+    background:#0b0f18;
+  }
+  .slide.on{opacity:1;visibility:visible;transform:none;z-index:2;}
+  .slide.nofade{transition:none !important;}
+
+  .txt{position:absolute;white-space:pre-wrap;}
+
+  /* ---------- 深色页光带 ---------- */
+  .beam{position:absolute;filter:blur(45px);}
+
+  /* ---------- 封面肖像卡片（棱彩玻璃 + 鼠标倾斜） ---------- */
+  .portrait{
+    position:absolute;left:1232px;top:204px;width:479px;height:671px;
+    perspective:1500px;z-index:4;cursor:pointer;
+  }
+  .portrait-float{width:100%;height:100%;transform-style:preserve-3d;animation:floaty 7.5s ease-in-out infinite;}
+  .portrait-inner{
+    position:relative;width:100%;height:100%;border-radius:100px;overflow:hidden;
+    transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translate3d(var(--tx,0px),var(--ty,0px),0);
+    transform-style:preserve-3d;
+    transition:transform .26s cubic-bezier(.22,.61,.36,1), box-shadow .45s ease;
+    box-shadow:0 34px 80px rgba(2,32,90,.45), 0 2px 0 rgba(255,255,255,.22) inset, 0 0 0 1px rgba(255,255,255,.16);
+    background:#0b1a33;
+  }
+  .portrait:hover .portrait-inner{
+    box-shadow:0 46px 110px rgba(2,32,90,.62), 0 2px 0 rgba(255,255,255,.3) inset, 0 0 0 1px rgba(255,255,255,.28);
+  }
+  .portrait-inner img{width:100%;height:100%;object-fit:cover;display:block}
+  .prism{
+    position:absolute;inset:-28%;pointer-events:none;opacity:.55;mix-blend-mode:screen;
+    background:conic-gradient(from var(--ang,0deg) at 50% 50%,#ff5f6d,#ffc371,#7df59d,#63e6ff,#8b7bff,#ff8ad8,#ff5f6d);
+    filter:blur(28px) saturate(165%);
+    -webkit-mask-image:radial-gradient(80% 80% at 50% 50%,transparent 42%,#000 78%);
+    mask-image:radial-gradient(80% 80% at 50% 50%,transparent 42%,#000 78%);
+    transform:translate3d(calc(var(--mx,0)*1px),calc(var(--my,0)*1px),0);
+  }
+  .glass-edge{
+    position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:linear-gradient(155deg,rgba(255,255,255,.55),rgba(255,255,255,0) 42%,rgba(255,255,255,0) 62%,rgba(255,255,255,.32));
+    mix-blend-mode:soft-light;opacity:.9;
+  }
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+  /* ---------- Agenda 磨砂玻璃气泡 ---------- */
+  .bubble{
+    position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:#1d3350;font-size:48px;font-weight:900;font-style:italic;letter-spacing:.2px;
+    background:
+      linear-gradient(115deg,rgba(255,255,255,0) 34%,rgba(255,255,255,.18) 45%,rgba(255,255,255,0) 56%),
+      linear-gradient(168deg,rgba(255,255,255,.38),rgba(255,255,255,.04) 46%,rgba(255,255,255,.02) 70%,rgba(255,255,255,.2)),
+      linear-gradient(160deg,rgba(58,148,255,.94),rgba(35,136,255,.9) 55%,rgba(19,102,224,.95));
+    border:1px solid rgba(255,255,255,.55);
+    -webkit-backdrop-filter:blur(20px) saturate(180%) brightness(1.06);
+    backdrop-filter:blur(20px) saturate(180%) brightness(1.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.75),
+      inset 0 -1px 0 rgba(255,255,255,.3),
+      inset 0 -14px 22px -14px rgba(4,32,80,.55),
+      0 14px 36px rgba(31,110,220,.26);
+    transition:box-shadow .45s ease;
+    animation:bob var(--dur,7s) ease-in-out infinite;animation-delay:var(--del,0s);
+    will-change:transform;
+  }
+  .bubble:hover{
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,.7),
+      inset 1px 0 1px rgba(255,255,255,.26),
+      inset -1px 0 1px rgba(255,255,255,.26),
+      inset 0 -10px 18px -12px rgba(4,32,80,.5),
+      0 22px 54px rgba(31,110,220,.4);
+  }
+  .bubble span{pointer-events:none;text-shadow:0 1px 0 rgba(255,255,255,.22)}
+  /* 回溯时冻结气泡漂浮，保证文字落点与气泡完全重合 */
+  .pin .bubble{animation-play-state:paused}
+
+  #agendaCard{cursor:pointer;transition:transform .5s cubic-bezier(.22,.61,.36,1),box-shadow .5s ease,opacity .3s ease}
+  #agendaCard:hover{transform:translateY(-10px) scale(1.025);box-shadow:0 46px 90px rgba(24,64,140,.34)}
+
+  /* ---------- Projects 卡片 ---------- */
+  .proj{
+    position:absolute;border-radius:96px;overflow:hidden;
+    background:linear-gradient(158deg,rgba(255,255,255,.11),rgba(255,255,255,.03) 58%,rgba(255,255,255,.07));
+    border:1px solid rgba(255,255,255,.14);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    box-shadow:0 24px 60px rgba(3,12,32,.34), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .proj .bar{position:absolute;left:0;top:0;bottom:0;width:12px;background:linear-gradient(180deg,#5fb2ff,#1f7ae8)}
+  .proj .idx{position:absolute;right:64px;top:44px;font-size:22px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.3)}
+  .proj h3{margin:0;font-size:42px;line-height:52px;font-weight:700;color:#fff;letter-spacing:.2px}
+  .proj .meta{margin-top:10px;font-size:22px;line-height:30px;color:#9fb6d8}
+  .proj p{margin:18px 0 0;font-size:23px;line-height:36px;color:#d3dded;font-weight:400}
+  .chips{position:absolute;left:88px;display:flex;gap:12px}
+  .chip{
+    padding:9px 20px;border-radius:999px;font-size:20px;line-height:24px;
+    color:#bcdcff;background:rgba(35,136,255,.16);
+    border:1px solid rgba(93,175,255,.45);
+  }
+  .chip.ghost{color:#8d9ab2;background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.14)}
+
+  /* ---------- Research Program（研究计划页） ---------- */
+  .rp-card{
+    position:absolute;width:540px;height:342px;border-radius:28px;padding:36px 40px;box-sizing:border-box;
+    background:linear-gradient(160deg,rgba(255,255,255,.94),rgba(238,247,255,.8));
+    border:1px solid rgba(35,136,255,.16);
+    box-shadow:0 26px 60px rgba(31,88,164,.12), inset 0 1px 0 #ffffff;
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  }
+  .rp-num{font-size:22px;line-height:1;font-weight:700;color:#a8bed8;letter-spacing:.16em}
+  .rp-h{margin-top:14px;font-size:31px;line-height:40px;font-weight:700;color:#19213d}
+  .rp-h span{display:block;margin-top:2px;font-size:16px;line-height:22px;font-weight:600;color:#93a8c4;letter-spacing:.06em}
+  .rp-list{margin:20px 0 0;padding:0;list-style:none}
+  .rp-list li{
+    position:relative;padding-left:24px;margin-bottom:12px;
+    font-size:21px;line-height:32px;color:#3f4a63;
+  }
+  .rp-list li::before{
+    content:"";position:absolute;left:4px;top:13px;width:8px;height:8px;border-radius:50%;
+    background:#2388ff;box-shadow:0 0 0 4px rgba(35,136,255,.14);
+  }
+
+  .rp-node{position:absolute;top:812px;width:280px;margin-left:-14px}
+  .rp-node i{
+    position:absolute;left:0;top:-9px;width:18px;height:18px;border-radius:50%;
+    background:#ffffff;border:2px solid #2388ff;box-shadow:0 0 0 6px rgba(35,136,255,.12),0 6px 16px rgba(35,136,255,.25);
+  }
+  .rp-node b{display:block;margin:34px 0 0 2px;font-size:24px;line-height:30px;font-weight:700;color:#19213d}
+  .rp-node span{display:block;margin:2px 0 0 2px;font-size:19px;line-height:26px;color:#7b8fae}
+
+  /* ---------- 论文二维码（悬停 Published 显示） ---------- */
+  .pub-wrap{position:absolute;display:flex;align-items:center;justify-content:center;z-index:30}
+  .pub-txt{
+    position:relative;font-size:36px;line-height:56px;color:#61dd75;cursor:help;
+    transition:text-shadow .25s ease;
+  }
+  .pub-wrap:hover .pub-txt{text-shadow:0 0 20px rgba(97,221,117,.6)}
+  .qr-pop{
+    position:absolute;left:calc(100% + 14px);top:-56px;width:244px;padding:12px 12px 9px;
+    border-radius:20px;background:rgba(10,22,44,.9);
+    border:1px solid rgba(140,200,255,.28);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    box-shadow:0 30px 64px rgba(2,16,44,.65), inset 0 1px 0 rgba(255,255,255,.14);
+    opacity:0;visibility:hidden;pointer-events:none;
+    transform:translate(-10px,6px) scale(.94);transform-origin:left center;
+    transition:opacity .22s ease,transform .3s cubic-bezier(.2,.8,.3,1),visibility .22s;
+    z-index:40;
+  }
+  .pub-wrap:hover .qr-pop,.pub-wrap:focus-within .qr-pop{
+    opacity:1;visibility:visible;pointer-events:auto;transform:translate(0,0) scale(1);
+  }
+  .qr-pop img{display:block;margin:0 auto;width:220px;height:220px;border-radius:10px;background:#fff;image-rendering:pixelated}
+  .qr-cap{display:block;margin-top:6px;text-align:center;font-size:13px;line-height:17px;color:#a9c8ea;font-weight:600;letter-spacing:.6px}
+
+  /* ---------- Skills：星轨（全屏 · 多材质） ---------- */
+  #s6 .orbit{position:absolute;inset:0;isolation:isolate}
+  .orbit-ring{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+  .dust{animation:travel 52s linear infinite}
+  .d3{animation-duration:38s;animation-delay:-12s}
+  .d4{animation-duration:27s;animation-direction:reverse;animation-delay:-5s}
+  @keyframes travel{to{stroke-dashoffset:-3694}}
+  .orbit.paused .dust{animation-play-state:paused}
+
+  .stars{
+    position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55;
+    background-image:
+      radial-gradient(1.6px 1.6px at 9% 17%,rgba(200,228,255,.85),transparent),
+      radial-gradient(1.2px 1.2px at 22% 63%,rgba(180,214,255,.7),transparent),
+      radial-gradient(2px 2px at 31% 28%,rgba(210,234,255,.8),transparent),
+      radial-gradient(1.2px 1.2px at 44% 79%,rgba(180,214,255,.6),transparent),
+      radial-gradient(1.6px 1.6px at 57% 12%,rgba(205,230,255,.75),transparent),
+      radial-gradient(1.2px 1.2px at 66% 66%,rgba(180,214,255,.6),transparent),
+      radial-gradient(2.2px 2.2px at 74% 24%,rgba(215,236,255,.8),transparent),
+      radial-gradient(1.2px 1.2px at 83% 72%,rgba(180,214,255,.65),transparent),
+      radial-gradient(1.8px 1.8px at 91% 38%,rgba(205,230,255,.7),transparent),
+      radial-gradient(1.2px 1.2px at 15% 88%,rgba(180,214,255,.55),transparent),
+      radial-gradient(1.4px 1.4px at 50% 46%,rgba(200,228,255,.5),transparent),
+      radial-gradient(1.2px 1.2px at 96% 85%,rgba(190,220,255,.6),transparent);
+  }
+
+  .core{position:absolute;left:960px;top:548px;width:320px;height:320px;margin:-160px 0 0 -160px;z-index:6;opacity:0}
+  .slide.on .core{animation:coreIn .9s .1s cubic-bezier(.2,.8,.3,1) both}
+  .core::after{content:"";position:absolute;inset:-32px;border-radius:50%;border:1px solid rgba(150,205,255,.24);box-shadow:inset 0 0 34px rgba(90,170,255,.2);pointer-events:none}
+  .core::before{content:"";position:absolute;inset:-70px;border-radius:50%;border:1px dashed rgba(130,190,250,.16);pointer-events:none}
+  .core-halo{position:absolute;inset:-110px;border-radius:50%;background:radial-gradient(circle,rgba(64,152,255,.34),rgba(64,152,255,0) 66%);filter:blur(18px)}
+  .core-ball{
+    position:absolute;inset:0;border-radius:50%;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    background:radial-gradient(circle at 33% 26%,#ffffff 0%,#d9eeff 17%,#7cc0f6 44%,#2b7dd6 72%,#0c3d84 100%);
+    box-shadow:inset -18px -24px 44px rgba(4,26,70,.55), inset 14px 16px 34px rgba(255,255,255,.45), 0 0 74px rgba(56,148,255,.5), 0 26px 54px rgba(2,16,44,.5);
+    animation:coreBreath 9.5s ease-in-out infinite;
+  }
+  .core-ball::after{
+    content:"";position:absolute;inset:-40%;border-radius:50%;pointer-events:none;
+    background:conic-gradient(from 0deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.22) 40deg,rgba(255,255,255,0) 96deg,rgba(255,255,255,0) 210deg,rgba(190,230,255,.18) 260deg,rgba(255,255,255,0) 320deg);
+    animation:coreSpin 14s linear infinite;
+  }
+  @keyframes coreSpin{to{transform:rotate(360deg)}}
+  .core-ball .w{font-size:30px;text-shadow:0 1px 0 rgba(255,255,255,.4);font-weight:700;color:#082d5c;letter-spacing:.2px;line-height:1;position:relative;z-index:1}
+  @keyframes coreIn{from{opacity:0;transform:scale(.72);filter:blur(12px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+  @keyframes coreBreath{
+    0%,100%{box-shadow:inset -18px -24px 44px rgba(4,26,70,.55), inset 14px 16px 34px rgba(255,255,255,.45), 0 0 58px rgba(56,148,255,.42), 0 26px 54px rgba(2,16,44,.5)}
+    50%{box-shadow:inset -18px -24px 44px rgba(4,26,70,.55), inset 14px 16px 34px rgba(255,255,255,.45), 0 0 104px rgba(76,168,255,.62), 0 26px 54px rgba(2,16,44,.5)}
+  }
+
+  .sat{
+    position:absolute;left:0;top:0;width:0;height:0;will-change:transform;
+    transform:translate3d(var(--x,960px),var(--y,548px),0) scale(var(--sz,1));
+  }
+  .sat-in{
+    position:absolute;left:0;top:0;transform:translate(-50%,-50%);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:6px;
+    font-family:"Inter","Microsoft YaHei",sans-serif;font-weight:600;color:var(--fg,#0b2c56);
+    letter-spacing:.2px;line-height:1.15;
+    transition:transform .3s cubic-bezier(.2,.8,.3,1),filter .3s ease,box-shadow .3s ease;
+    opacity:0;
+  }
+  .slide.on .sat-in{animation:satIn .85s var(--d,200ms) both}
+  .sat-in::after{
+    content:"";position:absolute;left:16%;top:10%;width:36%;height:27%;border-radius:50%;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(255,255,255,var(--hi,.9)),rgba(255,255,255,0));filter:blur(1.5px);
+  }
+  .sat[data-href] .sat-in{cursor:pointer}
+  .sat:hover .sat-in{transform:translate(-50%,-50%) scale(1.16);filter:brightness(1.12) saturate(1.06) drop-shadow(0 0 20px rgba(120,196,255,.7))}
+  @keyframes satIn{from{opacity:0;filter:blur(10px)}to{opacity:1;filter:blur(0)}}
+
+  /* ① 磨砂玻璃 */
+  .m-frost{--hi:.95;
+    background:linear-gradient(160deg,rgba(244,252,255,.97),rgba(208,234,255,.94) 46%,rgba(152,198,243,.9));
+    border:1px solid rgba(255,255,255,.6);
+    -webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.95),inset 0 -22px 34px rgba(10,44,96,.3),0 18px 34px rgba(2,16,44,.45);
+  }
+  /* ② 陶瓷 */
+  .m-ceramic{--hi:.85;--fg:#123a67;
+    background:radial-gradient(circle at 34% 26%,#ffffff,#eef7ff 38%,#c9dff7 74%,#96b8dd 100%);
+    box-shadow:inset -10px -12px 26px rgba(60,100,150,.3),inset 10px 10px 22px rgba(255,255,255,.95),0 16px 30px rgba(2,16,44,.4);
+  }
+  /* ③ 液态金属 */
+  .m-metal{--hi:1;--fg:#12283f;
+    background:linear-gradient(146deg,#7f8fa2 0%,#f2f9ff 14%,#9aaec6 32%,#ffffff 47%,#71859c 62%,#dfeaf7 78%,#8598ae 92%,#c3d3e4 100%);
+    box-shadow:inset -12px -14px 28px rgba(12,30,52,.6),inset 10px 12px 24px rgba(255,255,255,.75),0 18px 34px rgba(2,16,44,.5);
+  }
+  /* ④ 拉丝钢 */
+  .m-brushed{--hi:.6;--fg:#12304f;
+    background:
+      repeating-linear-gradient(112deg,rgba(255,255,255,.16) 0 2px,rgba(255,255,255,0) 2px 5px),
+      radial-gradient(circle at 32% 24%,#eaf3ff,#c2d6ec 46%,#93aecb 78%,#6f89a8 100%);
+    box-shadow:inset -10px -12px 26px rgba(20,40,66,.45),inset 10px 10px 22px rgba(255,255,255,.6),0 18px 34px rgba(2,16,44,.45);
+  }
+  /* ⑤ 珍珠贝母 */
+  .m-pearl{--hi:.85;--fg:#3a2a55;
+    background:conic-gradient(from 128deg,#ffe7f1,#e7f1ff,#e7ffef,#fff8dc,#ece7ff,#ffe7f1);
+    box-shadow:inset -12px -14px 28px rgba(120,140,190,.35),inset 10px 12px 24px rgba(255,255,255,.9),0 16px 32px rgba(2,16,44,.4);
+  }
+  /* ⑥ 冰晶 */
+  .m-ice{--hi:1;--fg:#0a3a63;
+    background:radial-gradient(circle at 30% 24%,#ffffff,#f0faff 32%,#d5f0ff 58%,#a8d8f6 82%,#7fb6dd 100%);
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:inset 0 0 30px rgba(255,255,255,.95),inset -10px -14px 26px rgba(112,176,226,.38),0 16px 30px rgba(2,16,44,.35);
+  }
+  /* ⑦ 全息 */
+  .m-holo{--hi:.7;--fg:#0d2440;text-shadow:0 1px 0 rgba(255,255,255,.5);
+    background:conic-gradient(from 20deg,#8fe0ff,#b9a8ff,#ff9fd6,#ffd39a,#9dffcf,#8fe0ff);
+    box-shadow:inset -12px -16px 30px rgba(30,40,90,.45),inset 10px 12px 24px rgba(255,255,255,.65),0 18px 34px rgba(2,16,44,.45);
+  }
+  /* ⑧ 星云 */
+  .m-nebula{--hi:.5;--fg:#dcebff;
+    background:
+      radial-gradient(circle at 68% 72%,rgba(120,180,255,.55),rgba(120,180,255,0) 46%),
+      radial-gradient(circle at 28% 30%,#3f68b4,#1d356c 44%,#0b1738 76%,#050b1e 100%);
+    box-shadow:inset -10px -14px 26px rgba(0,0,0,.6),inset 8px 10px 20px rgba(120,170,235,.2),0 18px 34px rgba(0,0,0,.5),0 0 34px rgba(74,132,220,.22);
+  }
+  /* ⑨ 碳纤维 */
+  .m-carbon{--hi:.45;--fg:#dbe9ff;
+    background:
+      repeating-linear-gradient(45deg,rgba(140,180,235,.10) 0 2px,rgba(0,0,0,0) 2px 4px),
+      repeating-linear-gradient(-45deg,rgba(140,180,235,.10) 0 2px,rgba(0,0,0,0) 2px 4px),
+      radial-gradient(circle at 30% 26%,#24344f,#16233a 52%,#0b1424 100%);
+    box-shadow:inset -10px -12px 26px rgba(0,0,0,.65),inset 8px 10px 20px rgba(120,170,230,.16),0 18px 32px rgba(0,0,0,.5);
+  }
+  /* ⑩ 蓝宝石 */
+  .m-sapphire{--hi:.7;--fg:#eaf5ff;
+    background:radial-gradient(circle at 32% 26%,#e7f4ff,#9ccfff 22%,#3f86e0 54%,#17458f 82%,#0a2a63 100%);
+    box-shadow:inset -12px -16px 30px rgba(2,16,50,.6),inset 10px 12px 24px rgba(255,255,255,.4),0 18px 34px rgba(2,16,44,.5);
+  }
+  .m-nebula,.m-carbon,.m-sapphire{text-shadow:0 1px 3px rgba(1,8,20,.55)}
+
+  @keyframes bob{
+    0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+    28%{transform:translate3d(var(--bx,6px),var(--by,-5px),0) rotate(var(--br,1.2deg))}
+    72%{transform:translate3d(calc(var(--bx,6px) * -1),calc(var(--by,-5px) * -.7),0) rotate(calc(var(--br,1.2deg) * -1))}
+  }
+
+  /* ---------- 详情页入场 ---------- */
+  .rv{opacity:0;transform:translateY(26px) scale(.99);filter:blur(8px)}
+  .slide.revealing .rv{animation:rvIn .72s cubic-bezier(.22,.61,.36,1) forwards;animation-delay:calc(var(--d,0) * 1ms)}
+  @keyframes rvIn{to{opacity:1;transform:none;filter:blur(0)}}
+
+  .rvf{opacity:0;filter:blur(14px)}
+  .slide.revealing .rvf{opacity:1;filter:blur(0);transition:opacity .85s ease,filter .95s ease;transition-delay:calc(var(--d,0) * 1ms)}
+
+  .tl{position:absolute;inset:0}
+  .slide.revealing .tl{animation:tlRise 1s cubic-bezier(.16,.84,.3,1) forwards;animation-delay:calc(var(--d,140) * 1ms)}
+  @keyframes tlRise{from{opacity:0;transform:translateY(150px)}to{opacity:1;transform:none}}
+
+  .page-glow{
+    position:absolute;pointer-events:none;z-index:0;
+    background:radial-gradient(circle at 50% 50%,rgba(53,120,210,.38),rgba(53,120,210,0) 68%);
+    filter:blur(28px);
+  }
+
+  .back{cursor:pointer;z-index:20;pointer-events:auto;}
+  .back::after{
+    content:"";position:absolute;inset:-12px -20px;border-radius:16px;
+    background:rgba(255,255,255,0);transition:background .3s ease;
+  }
+  .back:hover::after{background:rgba(255,255,255,.07)}
+
+  /* ---------- 过渡层 ---------- */
+  #morph{position:fixed;inset:0;pointer-events:none;z-index:60;display:none;overflow:hidden}
+  #morph.on{display:block}
+  #morph-fill{position:absolute;inset:0;background:#19213d;will-change:clip-path,opacity}
+  #morph-bubble{
+    position:absolute;border-radius:50%;transform-origin:50% 50%;
+    background:linear-gradient(152deg,rgba(104,176,255,.78),rgba(35,136,255,.6));
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    will-change:transform,filter,opacity;
+  }
+  #morph-label{
+    position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
+    font-weight:900;font-style:italic;color:#93a0b8;will-change:transform,opacity;
+  }
+
+  /* ---------- 翻卡 ---------- */
+  .flipcard{position:fixed;perspective:1700px;z-index:70;pointer-events:none;transform-origin:50% 50%}
+  .flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 50%}
+  .flip-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:100px;overflow:hidden;background:#fff}
+  .flip-face img{width:100%;height:100%;object-fit:cover;display:block}
+  .flip-back{transform:rotateY(180deg);background:#fff}
+  .flip-back img{object-fit:contain}
+
+  /* ---------- 底部 UI ---------- */
+  #ui{position:fixed;inset:0;pointer-events:none;z-index:50;}
+  #ui .btn{
+    pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%);
+    width:46px;height:76px;border:0;border-radius:14px;
+    background:rgba(255,255,255,.08);color:#cfd8ea;
+    font-size:26px;line-height:1;cursor:pointer;
+    transition:background .2s,color .2s;backdrop-filter:blur(6px);
+  }
+  #ui .btn:hover{background:rgba(255,255,255,.18);color:#fff;}
+  #ui .btn.prev{left:18px;}
+  #ui .btn.next{right:18px;}
+  #dots{
+    pointer-events:auto;position:absolute;left:50%;bottom:22px;transform:translateX(-50%);
+    display:flex;gap:9px;padding:8px 14px;border-radius:999px;
+    background:rgba(10,14,24,.55);backdrop-filter:blur(8px);
+  }
+  #dots b{
+    width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.28);
+    cursor:pointer;transition:all .25s;
+  }
+  #dots b.on{background:#fff;width:22px;border-radius:999px;}
+  #count{
+    position:absolute;right:22px;bottom:24px;font-size:12px;letter-spacing:.18em;
+    color:rgba(255,255,255,.45);user-select:none;
+  }
+  #hint{
+    position:absolute;left:22px;bottom:24px;font-size:12px;letter-spacing:.08em;
+    color:rgba(255,255,255,.32);user-select:none;
+  }
+  body.clean #ui{display:none;}
+  body.film #ui{display:none;}
+
+  /* 截图模式：所有动画元素直接到位 */
+  body.clean .rv{opacity:1 !important;transform:none !important;filter:none !important;animation:none !important}
+  body.clean .rvf{opacity:1 !important;filter:none !important;transition:none !important}
+  body.clean .tl{opacity:1 !important;transform:none !important;animation:none !important}
+  body.clean .bubble,body.clean .portrait-float{animation:none !important}
+  body.clean .sat-in{opacity:1 !important;animation:none !important;filter:none !important}
+  body.clean .core{opacity:1 !important;animation:none !important}
+  body.clean .core-ball,body.clean .dust{animation:none !important}
+  body.clean .slide{transition:none !important;transform:none !important}
+
+  @media (prefers-reduced-motion: reduce){
+    .portrait-float,.bubble{animation:none !important}
+    .slide{transition-duration:.001s}
+  }
+
+  /* ---------- 打印 / 导出 PDF ---------- */
+  @media print{
+    @page{size:1920px 1080px;margin:0;}
+    html,body{overflow:visible;background:#fff;}
+    #ui,#morph{display:none !important;}
+    #stage{
+      position:static;width:1920px;height:auto;
+      transform:none !important;box-shadow:none;background:#fff;
+    }
+    .slide{
+      position:relative;width:1920px;height:1080px;
+      opacity:1 !important;visibility:visible !important;
+      transform:none !important;page-break-after:always;break-after:page;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    }
+    .rv,.rvf{opacity:1 !important;transform:none !important;filter:none !important}
+    .tl{opacity:1 !important;transform:none !important}
+    .portrait-float,.bubble{animation:none !important}
+  }
+
+  /* ---------- 研究计划 → Thank you：内容淡出 · 字样浮现 · 淡蓝光晕外扩 ---------- */
+  #halo{position:absolute;left:960px;top:545px;width:1100px;height:1100px;margin:-550px 0 0 -550px;pointer-events:none;z-index:1;will-change:transform,opacity}
+  #halo i{position:absolute;inset:0;display:block;border-radius:50%;will-change:transform,opacity;backface-visibility:hidden}
+  #halo .disc{
+    background:radial-gradient(circle at 50% 50%,
+      rgba(35,136,255,.085) 0%,
+      rgba(35,136,255,.082) 20%,
+      rgba(35,136,255,.062) 38%,
+      rgba(35,136,255,.036) 53%,
+      rgba(35,136,255,.016) 67%,
+      rgba(35,136,255,.004) 78%,
+      rgba(35,136,255,0) 88%);
+    opacity:0;
+  }
+  #halo .ring{
+    background:radial-gradient(circle at 50% 50%,
+      rgba(35,136,255,0) 18%,
+      rgba(35,136,255,.014) 34%,
+      rgba(35,136,255,.042) 48%,
+      rgba(35,136,255,.036) 58%,
+      rgba(35,136,255,.016) 70%,
+      rgba(35,136,255,.004) 80%,
+      rgba(35,136,255,0) 90%);
+    opacity:0;
+  }
+  /* ---------- 蓝色栏目板块（置顶层） ---------- */
+  #footBar{position:absolute;left:0;top:0;width:1920px;height:1080px;pointer-events:none;z-index:80;display:none;opacity:0}
+  #footBar .fb-bar{position:absolute;left:0;top:858px;width:1920px;height:222px;background:linear-gradient(180deg,#239cff,#005be3)}
+
+  /* ---------- Thank you → Q & A：光晕收缩回中心 ---------- */
+  #haloQ{
+    position:absolute;left:960px;top:542px;width:1100px;height:1100px;
+    margin:-550px 0 0 -550px;border-radius:50%;pointer-events:none;z-index:70;
+    opacity:0;will-change:transform,opacity;
+    background:radial-gradient(circle at 50% 50%,
+      rgba(30,120,245,.16) 0%,
+      rgba(32,124,248,.15) 22%,
+      rgba(35,136,255,.115) 40%,
+      rgba(35,136,255,.068) 55%,
+      rgba(35,136,255,.028) 68%,
+      rgba(35,136,255,.007) 79%,
+      rgba(35,136,255,0) 88%);
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ================= 01 封面 ================= -->
+  <section class="slide on" id="s1" style="background:linear-gradient(133deg,#31a9ff 0%,#1b8cf9 36%,#0f6fe9 70%,#0a5ad2 100%)">
+    <div style="position:absolute;left:162px;top:-227px;width:1533px;height:1533px;border-radius:50%;background:rgba(255,255,255,.055)"></div>
+    <div style="position:absolute;left:452px;top:-96px;width:860px;height:860px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+
+    <img src="assets/logo-hsd.png" alt="哈尔滨师范大学" style="position:absolute;left:162px;top:21px;width:108px;height:109px;border-radius:50%;object-fit:cover" />
+    <img src="assets/logo-cas.png" alt="中国科学院东北地理与农业生态研究所" style="position:absolute;left:577px;top:19px;width:108px;height:109px;border-radius:50%;object-fit:cover" />
+
+    <div class="txt" style="left:-534px;top:61px;width:1888px;text-align:center;font-size:36px;line-height:56px">哈尔滨师范大学</div>
+    <div class="txt" style="left:57px;top:60px;width:1888px;text-align:center;font-size:36px;line-height:56px">中国科学院东北地理与农业生态研究所</div>
+
+    <div class="txt" style="left:145px;top:183px;width:498px;text-align:center;font-size:36px;line-height:56px">Personal Details Introduction</div>
+
+    <div class="txt" style="left:133px;top:433px;width:274px;text-align:center;font-size:128px;line-height:198px;font-weight:400">郭晋</div>
+
+    <div class="txt" style="left:145px;top:689px;width:760px;font-size:36px;line-height:56px">Tel: 13244669925</div>
+    <div class="txt" style="left:145px;top:751px;width:760px;font-size:36px;line-height:56px">Email: guojin020201@163.com</div>
+    <div class="txt" style="left:145px;top:817px;width:920px;font-size:36px;line-height:56px">HomePage: jinguo0201.github.io/portfolio/</div>
+
+    <div style="position:absolute;left:150px;top:150px;width:1620px;height:2px;background:rgba(255,255,255,.92)"></div>
+    <div style="position:absolute;left:150px;top:930px;width:1620px;height:2px;background:rgba(255,255,255,.92)"></div>
+
+    <div class="txt" style="left:149px;top:975px;width:1621px;text-align:center;font-size:48px;line-height:74px">GISer &amp; Designer &amp; Researcher &amp; Developer</div>
+
+    <div class="portrait" id="portrait">
+      <div class="portrait-float">
+        <div class="portrait-inner" id="portraitCard">
+          <img src="assets/photo.jpg" alt="郭晋" />
+          <div class="prism"></div>
+          <div class="glass-edge"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 02 Agenda ================= -->
+  <section class="slide" id="s2" style="background:#ffffff">
+    <div style="position:absolute;left:-822px;top:-667px;width:1782px;height:1334px;border-radius:50%;background:radial-gradient(circle at 48% 46%,rgba(35,136,255,.30),rgba(35,136,255,0) 62%);filter:blur(26px)"></div>
+
+    <div class="txt rv" style="left:55px;top:54px;width:449px;font-size:120px;line-height:156px;font-weight:600;color:#19213d;--d:80">Agenda</div>
+
+    <img id="agendaCard" src="assets/illustration.png" alt="" style="position:absolute;left:722px;top:287px;width:476px;height:507px;border-radius:128px;object-fit:cover" />
+
+    <div class="bubble rvf" data-go="s3" style="left:173px;top:206px;width:331px;height:337px;--bx:7px;--by:-6px;--br:1.4deg;--dur:7.4s;--del:.15s;--d:300"><span>Overview</span></div>
+    <div class="bubble rvf" data-go="s5" style="left:280px;top:640px;width:402px;height:408px;--bx:-8px;--by:-5px;--br:-1.1deg;--dur:8.2s;--del:.55s;--d:380"><span>Projects</span></div>
+    <div class="bubble rvf" data-go="s6" style="left:1310px;top:708px;width:299px;height:307px;--bx:6px;--by:-7px;--br:1deg;--dur:7.8s;--del:.35s;--d:460"><span>Skills</span></div>
+    <div class="bubble rvf" data-go="s4" style="left:1327px;top:111px;width:432px;height:443px;--bx:-7px;--by:-4px;--br:-1.5deg;--dur:8.6s;--del:.75s;--d:340"><span>Researches</span></div>
+  </section>
+
+  <!-- ================= 03 Overview ================= -->
+  <section class="slide" id="s3" style="background:#19213d">
+    <div class="beam" style="left:-737px;top:-428px;width:1964px;height:1356px;background:radial-gradient(48% 52% at 24% 20%,rgba(64,130,220,.34),rgba(64,120,210,0) 72%),radial-gradient(56% 58% at 86% 96%,rgba(18,52,120,.34),rgba(18,52,120,0) 72%)"></div>
+    <div class="page-glow" style="left:-150px;top:-200px;width:760px;height:680px"></div>
+
+    <div class="txt back rv" data-back="s2" style="left:93px;top:85px;width:686px;font-size:48px;line-height:74px;font-weight:900;font-style:italic;color:#5b6a88;--d:40">Overview</div>
+
+    <div class="txt rv" style="left:93px;top:202px;width:519px;font-size:96px;line-height:144px;font-weight:600;--d:120">郭晋</div>
+    <div class="txt rv" style="left:94px;top:312px;width:430px;font-size:40px;line-height:60px;color:#b4b9c9;--d:170">黑龙江省 · 哈尔滨市</div>
+    <div class="txt rv" style="left:555px;top:312px;width:430px;font-size:40px;line-height:60px;color:#b4b9c9;--d:200">2002-02-01</div>
+
+    <div class="txt rv" style="left:94px;top:460px;width:519px;font-size:64px;line-height:96px;font-weight:600;--d:250">英语能力</div>
+    <div class="txt rv" style="left:99px;top:547px;width:430px;font-size:40px;line-height:60px;color:#b4b9c9;--d:290">CET-4        453</div>
+    <div class="txt rv" style="left:528px;top:545px;width:430px;font-size:40px;line-height:60px;color:#b4b9c9;--d:320">CET-6        466</div>
+
+    <div class="txt rv" style="left:93px;top:641px;width:519px;font-size:64px;line-height:96px;font-weight:600;--d:370">获奖情况</div>
+    <div class="txt rv" style="left:98px;top:727px;width:1060px;font-size:40px;line-height:60px;color:#b4b9c9;--d:410">年度优秀志愿者×2   优秀学生干部×1   学业奖学金×2</div>
+
+    <div class="txt rv" style="left:99px;top:813px;width:519px;font-size:64px;line-height:96px;font-weight:600;--d:460">学生工作经历</div>
+    <div class="txt rv" style="left:104px;top:899px;width:1060px;font-size:40px;line-height:60px;color:#b4b9c9;--d:500">黑龙江工程学院校青年志愿者协会 · 副主席</div>
+
+    <!-- 时间轴 -->
+    <div class="tl" style="--d:160">
+      <div style="position:absolute;left:1303px;top:101px;width:3px;height:979px;background:#2388ff"></div>
+      <div style="position:absolute;left:1293px;top:101px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+      <div style="position:absolute;left:1293px;top:327px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+      <div style="position:absolute;left:1293px;top:555px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+      <div style="position:absolute;left:1293px;top:782px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+
+      <div style="position:absolute;left:1357px;top:76px;width:368px;height:70px;border-radius:35px;background:linear-gradient(100deg,#04adfe,#0066ff);box-shadow:0 0 34px rgba(35,136,255,.5);display:flex;align-items:center;justify-content:center;font-size:30px;line-height:42px;font-weight:600">2020.10 - 2024.6</div>
+      <div class="txt" style="left:1357px;top:183px;width:460px;font-size:36px;line-height:56px">本科
+黑龙江工程学院 · 测绘工程</div>
+
+      <div style="position:absolute;left:1357px;top:302px;width:368px;height:70px;border-radius:35px;background:linear-gradient(100deg,#04adfe,#0066ff);box-shadow:0 0 34px rgba(35,136,255,.5);display:flex;align-items:center;justify-content:center;font-size:30px;line-height:42px;font-weight:600">2024.9 - Now</div>
+      <div class="txt" style="left:1357px;top:412px;width:460px;font-size:36px;line-height:56px">硕士研究生
+哈尔滨师范大学 · 地理学</div>
+
+      <div style="position:absolute;left:1357px;top:531px;width:368px;height:70px;border-radius:35px;background:linear-gradient(100deg,#04adfe,#0066ff);box-shadow:0 0 34px rgba(35,136,255,.5);display:flex;align-items:center;justify-content:center;font-size:30px;line-height:42px;font-weight:600">2024.11 - 2025.8</div>
+      <div class="txt" style="left:1357px;top:627px;width:460px;font-size:36px;line-height:56px">联合培养
+中国水利水电科学研究院</div>
+
+      <div style="position:absolute;left:1357px;top:757px;width:368px;height:70px;border-radius:35px;background:linear-gradient(100deg,#04adfe,#0066ff);box-shadow:0 0 34px rgba(35,136,255,.5);display:flex;align-items:center;justify-content:center;font-size:30px;line-height:42px;font-weight:600">2025.9 - Now</div>
+      <div class="txt" style="left:1357px;top:854px;width:470px;font-size:36px;line-height:56px">联合培养
+中国科学院
+东北地理与农业生态研究所</div>
+    </div>
+  </section>
+
+  <!-- ================= 04 Researches ================= -->
+  <section class="slide" id="s4" style="background:#19213d">
+    <div class="beam" style="left:827px;top:-488px;width:1964px;height:1356px;background:radial-gradient(50% 55% at 30% 22%,rgba(64,130,220,.32),rgba(64,120,210,0) 72%),radial-gradient(55% 60% at 84% 94%,rgba(18,52,120,.34),rgba(18,52,120,0) 72%)"></div>
+    <div class="page-glow" style="left:1170px;top:-220px;width:820px;height:700px"></div>
+
+    <div class="txt back rv" data-back="s2" style="left:1518px;top:85px;width:330px;font-size:48px;line-height:74px;font-weight:900;font-style:italic;text-align:left;color:#5b6a88;--d:40">Researches</div>
+
+    <!-- 左侧时间轴 -->
+    <div class="tl" style="--d:120">
+      <div style="position:absolute;left:53px;top:84px;width:3px;height:980px;background:#2388ff"></div>
+      <div style="position:absolute;left:43px;top:63px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+      <div style="position:absolute;left:43px;top:374px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+      <div style="position:absolute;left:43px;top:686px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+      <div style="position:absolute;left:43px;top:996px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>
+    </div>
+
+    <div class="rv pub-wrap" style="left:653px;top:61px;width:422px;height:56px;--d:180">
+      <span class="pub-txt" tabindex="0">Published</span>
+      <span class="qr-pop">
+        <img src="assets/paper1-qr.png" alt="论文发表页二维码">
+        <span class="qr-cap">扫码查看论文</span>
+      </span>
+    </div>
+
+    <!-- 论文 1 -->
+    <div class="rv" style="position:absolute;inset:0;--d:180">
+      <div style="position:absolute;left:83px;top:33px;width:645px;height:81px;border-radius:96px;background:linear-gradient(90deg,#1054ff 0%,rgba(16,84,255,0) 100%);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700">样本代表性与空间预测可靠性</div>
+      <div class="txt" style="left:91px;top:131px;width:1571px;font-size:32px;line-height:44px;font-weight:700">Optimization of Sampling Density in Regional-Scale Soil Organic Carbon Mapping and Its Impact on Prediction Accuracy</div>
+      <div class="txt" style="left:91px;top:221px;width:897px;font-size:24px;line-height:37px;color:#6d758f">县域尺度下有机质样本量按不同抽样方法递减对有机质预测地图反演精度的影响研究</div>
+      <div class="txt" style="left:91px;top:266px;width:1401px;font-size:24px;line-height:37px">不同抽样方法在样本量递减过程中的精度衰减特征存在显著差异， 据此提出了兼顾成本与精度的采样建议，可直接指导同类区域土壤制图采样设计。</div>
+    </div>
+
+    <!-- 论文 2 -->
+    <div class="rv" style="position:absolute;inset:0;--d:260">
+      <div style="position:absolute;left:83px;top:344px;width:645px;height:81px;border-radius:96px;background:linear-gradient(90deg,#1054ff 0%,rgba(16,84,255,0) 100%);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700">多尺度空间特征建模</div>
+      <div class="txt" style="left:653px;top:356px;width:422px;font-size:36px;line-height:56px;text-align:center;color:#f6b704">submitted</div>
+      <div class="txt" style="left:91px;top:440px;width:1571px;font-size:32px;line-height:44px;font-weight:700">A spatio-temporal multi-scale attention recurrent network for 30-m resolution soil organic carbon mapping of croplands in China</div>
+      <div class="txt" style="left:91px;top:530px;width:897px;font-size:24px;line-height:37px;color:#6d758f">用于中国耕地土壤有机碳30米分辨率遥感映射的时空多尺度注意力循环网络</div>
+      <div class="txt" style="left:91px;top:575px;width:1401px;font-size:24px;line-height:37px">面向全中国耕地范围，构建 CNN-GRU 时空深度学习模型，充分挖掘遥感时序特征与空间上下文信息； 引入空间多尺寸卷积核动态加权特征融合机制，自适应聚合不同尺度的空间特征， 最终实现 30m 分辨率的耕地土壤有机碳预测制图。</div>
+    </div>
+
+    <!-- 论文 3 -->
+    <div class="rv" style="position:absolute;inset:0;--d:340">
+      <div style="position:absolute;left:83px;top:656px;width:645px;height:81px;border-radius:96px;background:linear-gradient(90deg,#1054ff 0%,rgba(16,84,255,0) 100%);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700">多元环境信息与深度学习融合</div>
+      <div class="txt" style="left:653px;top:684px;width:422px;font-size:36px;line-height:56px;text-align:center;color:#f6b704">submitted</div>
+      <div class="txt" style="left:83px;top:754px;width:1571px;font-size:32px;line-height:44px;font-weight:700">Cross-Modal Attention-Driven Semantic Conditioning of Environmental Representations for 30-m Cropland Soil Organic Carbon Mapping Across China</div>
+      <div class="txt" style="left:83px;top:844px;width:897px;font-size:24px;line-height:37px;color:#6d758f">跨模态注意力驱动的环境表征语义条件化：面向全中国 30 m 耕地土壤有机碳制图</div>
+      <div class="txt" style="left:83px;top:889px;width:1409px;font-size:24px;line-height:37px">面向全中国耕地范围，构建跨模态注意力制图框架：以 1D-CNN 编码器将多光谱反射率、 地形与气候协变量映射为连续环境表征序列，同时将作物类型、种植频次、临时耕地与 灌溉等农业利用信息嵌入为混合语义表征。</div>
+    </div>
+
+    <!-- 论文 4 -->
+    <div class="rv" style="position:absolute;inset:0;--d:420">
+      <div style="position:absolute;left:83px;top:966px;width:645px;height:81px;border-radius:96px;background:linear-gradient(90deg,#1054ff 0%,rgba(16,84,255,0) 100%);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700">三维土壤属性空间预测</div>
+      <div class="txt" style="left:653px;top:994px;width:422px;font-size:36px;line-height:56px;text-align:center;color:#2388ff">Underway</div>
+    </div>
+  </section>
+
+  <!-- ================= 05 Projects ================= -->
+  <section class="slide" id="s5" style="background:#19213d">
+    <div class="beam" style="left:-737px;top:-428px;width:1964px;height:1356px;background:radial-gradient(48% 52% at 24% 20%,rgba(64,130,220,.34),rgba(64,120,210,0) 72%),radial-gradient(56% 58% at 86% 96%,rgba(18,52,120,.34),rgba(18,52,120,0) 72%)"></div>
+    <div class="page-glow" style="left:-150px;top:-200px;width:760px;height:680px"></div>
+
+    <div class="txt back rv" data-back="s2" style="left:93px;top:85px;width:686px;font-size:48px;line-height:74px;font-weight:900;font-style:italic;color:#5b6a88;--d:40">Projects</div>
+
+    <div class="proj rv" style="left:93px;top:170px;width:1719px;height:359px;--d:180">
+      <div class="bar"></div>
+      <div class="idx">PROJECT 01</div>
+      <div style="position:absolute;left:88px;top:40px;right:96px">
+        <h3>全国洪水风险图绘制（黑龙江部分）</h3>
+        <div class="meta">中国水利水电科学研究院 · 抗旱减灾研究中心（联合培养）　·　2024.11 – 2025.8</div>
+        <p>以支流为基本编制单元，承担黑龙江省齐齐哈尔市嫩江流域 11 条支流的建模汇算、数据分析、报告编制与图件设计全流程；完成洪水风险空间数据整理与计算，成果直接服务于流域防洪减灾决策。</p>
+      </div>
+      <div class="chips" style="top:262px">
+        <span class="chip">洪水风险制图</span><span class="chip">ArcGIS</span><span class="chip">水文建模汇算</span><span class="chip">图件设计</span>
+      </div>
+    </div>
+
+    <div class="proj rv" style="left:93px;top:553px;width:1719px;height:368px;--d:260">
+      <div class="bar" style="background:linear-gradient(180deg,#6ee7a8,#22a06b)"></div>
+      <div class="idx">PROJECT 02</div>
+      <div style="position:absolute;left:88px;top:40px;right:96px">
+        <h3>第三次全国土壤普查（龙江县单元）</h3>
+        <div class="meta">中国科学院东北地理与农业生态研究所 · 黑土地保护重点实验室（联合培养）　·　2025.9 – Now</div>
+        <p>承担普查单元土壤类型部分的全流程——样点布设与数据整理、土壤类型识别与判定、成果图件制作与质量检查；并参与黑土地保护专题，围绕土壤有机质/有机碳遥感数字制图开展深度学习建模与精度评估。</p>
+      </div>
+      <div class="chips" style="top:271px">
+        <span class="chip">土壤普查</span><span class="chip">样点布设</span><span class="chip">成果图件与质检</span><span class="chip">黑土地保护</span>
+      </div>
+    </div>
+
+    <div class="rv" style="position:absolute;left:93px;top:953px;width:1719px;height:85px;border-radius:26px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;padding:0 34px;gap:14px;--d:340">
+      <span style="font-size:21px;color:#7f92b2;letter-spacing:2px;margin-right:8px">其他项目</span>
+      <span class="chip ghost">Demo · 项目一</span>
+      <span class="chip ghost">Demo · 项目二</span>
+      <span class="chip ghost">Demo · 项目三</span>
+      <span class="chip ghost">Demo · 项目四</span>
+      <span style="margin-left:auto;font-size:19px;color:#5f708c">占位 · 待补充</span>
+    </div>
+  </section>
+
+  <!-- ================= 06 Skills ================= -->
+  <section class="slide" id="s6" style="background:#19213d">
+    <div class="beam" style="left:827px;top:-488px;width:1964px;height:1356px;background:radial-gradient(50% 55% at 30% 22%,rgba(64,130,220,.32),rgba(64,120,210,0) 72%),radial-gradient(55% 60% at 84% 94%,rgba(18,52,120,.34),rgba(18,52,120,0) 72%)"></div>
+    <div class="page-glow" style="left:1180px;top:-240px;width:800px;height:700px"></div>
+    <div class="stars"></div>
+
+    <div class="txt back rv" data-back="s2" style="left:1553px;top:69px;width:305px;font-size:48px;line-height:74px;font-weight:900;font-style:italic;text-align:center;color:#5b6a88;--d:40">Skills</div>
+
+    <div class="rv orbit" style="--d:150">
+
+      <svg class="orbit-ring" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="ringG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="rgba(132,196,255,.66)"/>
+            <stop offset=".48" stop-color="rgba(132,196,255,.14)"/>
+            <stop offset="1" stop-color="rgba(132,196,255,.58)"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="960" cy="548" rx="790" ry="340" fill="none" stroke="rgba(110,180,255,.10)" stroke-width="12" style="filter:blur(7px)"/>
+        <ellipse cx="960" cy="548" rx="790" ry="340" fill="none" stroke="url(#ringG)" stroke-width="1.6"/>
+        <ellipse cx="960" cy="548" rx="742" ry="318" fill="none" stroke="rgba(120,180,240,.12)" stroke-width="1" stroke-dasharray="2 16"/>
+        <ellipse class="dust d3" cx="960" cy="548" rx="790" ry="340" fill="none" stroke="rgba(120,180,240,.55)" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="7 3380" opacity=".28"/>
+        <ellipse class="dust d4" cx="960" cy="548" rx="790" ry="340" fill="none" stroke="rgba(140,196,250,.5)" stroke-width="1" stroke-linecap="round" stroke-dasharray="4 3383" opacity=".22"/>
+      </svg>
+
+      <div class="core">
+        <div class="core-halo"></div>
+        <div class="core-ball m-core">
+          <span class="w">GISer</span>
+          <span class="w">Designer</span>
+          <span class="w">Researcher</span>
+          <span class="w">Developer</span>
+        </div>
+      </div>
+
+      <div class="sat" data-a0="0" data-href="https://jinguo0201.github.io/HGZpointsFixingTool/" style="--d:230ms"><div class="sat-in m-frost" style="width:138px;height:138px;font-size:28px">WebGIS</div></div>
+      <div class="sat" data-a0="36" style="--d:275ms"><div class="sat-in m-ceramic" style="width:110px;height:110px;font-size:24px">QGIS</div></div>
+      <div class="sat" data-a0="72" style="--d:320ms"><div class="sat-in m-metal" style="width:156px;height:156px;font-size:22px">Powershell</div></div>
+      <div class="sat" data-a0="108" style="--d:365ms"><div class="sat-in m-carbon" style="width:107px;height:107px;font-size:23px">Linux</div></div>
+      <div class="sat" data-a0="144" style="--d:410ms"><div class="sat-in m-pearl" style="width:124px;height:124px;font-size:26px">Blender</div></div>
+      <div class="sat" data-a0="180" style="--d:455ms"><div class="sat-in m-ice" style="width:88px;height:88px;font-size:20px">LaTex</div></div>
+      <div class="sat" data-a0="216" style="--d:500ms"><div class="sat-in m-holo" style="width:156px;height:156px;font-size:32px">ArcGIS</div></div>
+      <div class="sat" data-a0="252" style="--d:545ms"><div class="sat-in m-nebula" style="width:107px;height:107px;font-size:23px">Visio</div></div>
+      <div class="sat" data-a0="288" style="--d:590ms"><div class="sat-in m-brushed" style="width:138px;height:138px;font-size:27px">ArcGIS Pro</div></div>
+      <div class="sat" data-a0="324" style="--d:635ms"><div class="sat-in m-sapphire" style="width:135px;height:135px;font-size:28px">Python</div></div>
+
+    </div>
+  </section>
+
+  <!-- ================= 07 Research Program ================= -->
+  <section class="slide" id="s7r" style="background:linear-gradient(180deg,#ffffff 0%,#f6fbff 46%,#e8f2ff 100%)">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(35,136,255,.07) 0 1px,transparent 1px 176px),repeating-linear-gradient(0deg,rgba(35,136,255,.07) 0 1px,transparent 1px 176px)"></div>
+
+    <!-- DEMO 占位：正式内容待补充 -->
+    <div class="rv" style="position:absolute;inset:0;--d:40;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:300px;line-height:1;font-weight:800;letter-spacing:.08em;color:rgba(35,136,255,.17);text-shadow:0 2px 0 rgba(255,255,255,.95);user-select:none">DEMO</div>
+      <div class="txt" style="position:relative;left:auto;top:auto;margin-top:42px;font-size:22px;line-height:34px;letter-spacing:.34em;color:#a3b7d0;font-weight:600">内容待补充 · CONTENT PENDING</div>
+    </div>
+  </section>
+
+  <!-- ================= 08 Thank you ================= -->
+  <section class="slide" id="s8" style="background:linear-gradient(180deg,#ffffff 0%,#f4f9ff 52%,#e3efff 100%)">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(35,136,255,.05) 0 1px,transparent 1px 176px),repeating-linear-gradient(0deg,rgba(35,136,255,.05) 0 1px,transparent 1px 176px)"></div>
+    <div id="halo" aria-hidden="true"><i class="disc"></i><i class="ring"></i></div>
+
+    <div class="txt" style="left:0;top:459px;width:1920px;font-size:180px;line-height:180px;font-weight:600;color:#19213d;text-align:center;white-space:nowrap">Thank you</div>
+
+  </section>
+
+  <!-- ================= 08 Q & A ================= -->
+  <section class="slide" id="s9" style="background:#ffffff">
+    <div style="position:absolute;left:506px;top:181px;width:914px;height:723px;border-radius:50%;background:radial-gradient(circle,rgba(30,120,245,.30),rgba(35,136,255,.17) 40%,rgba(35,136,255,.055) 58%,rgba(35,136,255,0) 72%);filter:blur(46px)"></div>
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(35,136,255,.04) 0 1px,transparent 1px 176px),repeating-linear-gradient(0deg,rgba(35,136,255,.04) 0 1px,transparent 1px 176px)"></div>
+
+    <div class="txt" style="left:0;top:470px;width:1920px;font-size:180px;line-height:180px;font-weight:600;color:#19213d;text-align:center;white-space:nowrap">Q &amp; A</div>
+
+  </section>
+
+  <!-- ================= 09 Backup ================= -->
+  <section class="slide" id="s10" style="background:#e3efff">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.6) 0 2px,transparent 2px 192px);background-position:192px 0"></div>
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.6) 0 2px,transparent 2px 175px);background-position:0 22px"></div>
+
+    <img src="assets/worldmap.svg" alt="" style="position:absolute;left:99px;top:342px;width:1721px;height:683px" />
+
+    <div class="txt" style="left:28px;top:56px;width:268px;font-size:36px;line-height:56px;text-align:center;color:#1b2436">Backup</div>
+  </section>
+
+  <div id="haloQ" aria-hidden="true"></div>
+
+  <!-- 蓝色栏目板块：独立置顶层，不被光晕覆盖 -->
+  <div id="footBar" aria-hidden="true">
+    <div class="fb-bar"></div>
+    <div class="txt" style="left:150px;top:944px;width:200px;font-size:24px;line-height:36px;color:#e3efff">Contact email</div>
+    <div class="txt" style="left:150px;top:977px;width:360px;font-size:24px;line-height:32px;font-weight:600;color:#fff">guojin020201@163.com</div>
+    <div class="txt" style="left:1678px;top:944px;width:92px;font-size:24px;line-height:36px;color:#e3efff;text-align:right">Website</div>
+    <div class="txt" style="left:1413px;top:977px;width:357px;font-size:24px;line-height:32px;font-weight:600;text-align:right;color:#fff">jinguo0201.github.io/portfolio/</div>
+  </div>
+
+</div>
+
+<div id="morph" aria-hidden="true">
+  <div id="morph-fill"></div>
+  <div id="morph-bubble"></div>
+  <div id="morph-label"></div>
+</div>
+
+<div id="ui">
+  <button class="btn prev" aria-label="上一页">‹</button>
+  <button class="btn next" aria-label="下一页">›</button>
+  <div id="dots"></div>
+  <div id="hint">← → 翻页 · 点击气泡进板块 · F 全屏</div>
+  <div id="count">01 / 10</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage    = document.getElementById('stage');
+  var slides   = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dots     = document.getElementById('dots');
+  var count    = document.getElementById('count');
+  var morph    = document.getElementById('morph');
+  var fill     = document.getElementById('morph-fill');
+  var mBubble  = document.getElementById('morph-bubble');
+  var mLabel   = document.getElementById('morph-label');
+  var portrait = document.getElementById('portrait');
+  var card     = document.getElementById('portraitCard');
+
+  var byId = {};
+  slides.forEach(function (s, n) { byId[s.id] = n; });
+
+  var frozenHead = null;
+
+  /* 取元素内文字的“字形矩形”（不是文本盒），用于精准对齐标题 */
+  function textRect(el) {
+    var r = null;
+    try {
+      var rg = document.createRange();
+      rg.selectNodeContents(el);
+      r = rg.getBoundingClientRect();
+    } catch (e) { r = null; }
+    if (!r || !r.width || !r.height) r = el.getBoundingClientRect();
+    return r;
+  }
+
+  var shotMode = /[?&]shot=1/.test(location.search);
+  var pm       = /[?&]p=(\d+)/.exec(location.search);
+  var reduce   = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var D        = (shotMode || reduce) ? 0.001 : 1;
+
+  if (shotMode) document.body.classList.add('clean');
+  if (/[?&]film=1/.test(location.search)) document.body.classList.add('film');
+
+  var idx = 0;
+  var busy = false;
+  var scaleNow = 1;
+
+  function fit() {
+    scaleNow = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    stage.style.transform = 'translate(-50%,-50%) scale(' + scaleNow + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  /* ---------------- 基础导航 ---------------- */
+  /* ---------------- Skills：星轨（全屏 · 可暂停） ---------------- */
+  var ORB = { cx: 960, cy: 548, rx: 790, ry: 340, lap: 56000 };
+  var orbitSats = [], orbitOn = false, orbitRaf = 0, orbitElapsed = 0, orbitLast = 0, orbitPaused = false;
+
+  function orbitCollect() {
+    if (orbitSats.length) return;
+    var wrap = document.querySelector('.orbit');
+    if (!wrap) return;
+    orbitSats = Array.prototype.slice.call(wrap.querySelectorAll('.sat')).map(function (el) {
+      var href = el.getAttribute('data-href');
+      if (href) {
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(href, '_blank', 'noopener');
+        });
+      }
+      el.addEventListener('mouseenter', function () {
+        orbitPaused = true;
+        wrap.classList.add('paused');
+      });
+      el.addEventListener('mouseleave', function () {
+        orbitPaused = false;
+        wrap.classList.remove('paused');
+      });
+      return { el: el, a0: parseFloat(el.getAttribute('data-a0') || '0') * Math.PI / 180 };
+    });
+  }
+
+  function orbitPaint(t) {
+    for (var i = 0; i < orbitSats.length; i++) {
+      var s = orbitSats[i], a = s.a0 + t / ORB.lap * Math.PI * 2;
+      var x = ORB.cx + ORB.rx * Math.cos(a), y = ORB.cy + ORB.ry * Math.sin(a);
+      var d = Math.sin(a);
+      var st = s.el.style;
+      st.setProperty('--x', x.toFixed(2) + 'px');
+      st.setProperty('--y', y.toFixed(2) + 'px');
+      st.setProperty('--sz', (0.84 + 0.16 * (d + 1) / 2).toFixed(3));
+      st.zIndex = String(10 + Math.round((d + 1) * 10));
+      st.opacity = (0.86 + 0.14 * (d + 1) / 2).toFixed(3);
+    }
+  }
+
+  function orbitLoop() {
+    orbitRaf = requestAnimationFrame(function (ts) {
+      if (!orbitLast) orbitLast = ts;
+      var dt = ts - orbitLast;
+      orbitLast = ts;
+      if (dt > 80) dt = 80;
+      if (!orbitPaused) orbitElapsed += dt;
+      orbitPaint(orbitElapsed);
+      orbitLoop();
+    });
+  }
+
+  function orbitStart() {
+    orbitCollect();
+    if (!orbitSats.length || shotMode || orbitOn) return;
+    orbitOn = true; orbitLast = 0; orbitLoop();
+  }
+
+  function orbitStop() {
+    orbitOn = false;
+    orbitPaused = false;
+    orbitLast = 0;
+    if (orbitRaf) cancelAnimationFrame(orbitRaf);
+    orbitRaf = 0;
+    var wrap = document.querySelector('.orbit');
+    if (wrap) wrap.classList.remove('paused');
+  }
+
+  function updateUI(n) {    count.textContent = String(n + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+    Array.prototype.forEach.call(dots.children, function (d, k) { d.classList.toggle('on', k === n); });
+    if (history.replaceState) history.replaceState(null, '', '#s' + (n + 1));
+  }
+
+  function activate(n, opts) {
+    var reveal = opts && opts.reveal;
+    slides.forEach(function (s, k) {
+      s.classList.toggle('on', k === n);
+      if (k !== n) s.classList.remove('revealing');
+    });
+    var s = slides[n];
+    s.classList.remove('revealing');
+    if (reveal) {
+      void s.offsetWidth;
+      s.classList.add('revealing');
+    }
+    if (n === 5) orbitStart(); else orbitStop();
+
+    if (n === 7 || n === 8) {
+      if (footBar.style.display === 'none' || footBar.style.display === '') footBar.style.opacity = '1';
+      footBar.style.display = 'block';
+    } else if (footBar.style.display !== 'none') {
+      footBar.style.transition = 'opacity 220ms ease';
+      footBar.style.opacity = '0';
+      setTimeout(function () {
+        if (footBar.style.opacity === '0') { footBar.style.display = 'none'; footBar.style.transition = ''; }
+      }, 240);
+    }
+  }
+
+  function go(n) {
+    n = Math.max(0, Math.min(slides.length - 1, n));
+    if (busy || n === idx) return;
+
+    if (n === 1 && idx === 0) { busy = true; idx = 1; updateUI(1); flipForwards(); return; }
+    if (idx === 1 && n >= 2 && n <= 5) { busy = true; idx = n; bubbleForwards(n); return; }
+    if (idx === 1 && n === 6) { busy = true; idx = 6; flipToProgram(); return; }
+    if (idx === 6 && n === 7) { busy = true; idx = 7; programToThanks(); return; }
+    if (idx === 7 && n === 8) { busy = true; idx = 8; thanksToQA(); return; }
+    if (n === 1 && idx >= 2 && idx <= 5) { var from = slides[idx]; busy = true; idx = 1; bubbleBackwards(from); return; }
+
+    idx = n;
+    activate(n, { reveal: true });
+    updateUI(n);
+  }
+
+  slides.forEach(function (s, n) {
+    var b = document.createElement('b');
+    b.title = '第 ' + (n + 1) + ' 页';
+    b.addEventListener('click', function () { go(n); });
+    dots.appendChild(b);
+  });
+
+  function back() {
+    if (idx === 6) { go(1); return; }
+    go(idx - 1);
+  }
+
+  document.querySelector('.prev').addEventListener('click', function () { back(); });
+  document.querySelector('.next').addEventListener('click', function () { go(idx + 1); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); back(); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  /* ---------------- 封面：棱彩玻璃肖像卡 ---------------- */
+  (function tilt() {
+    if (!card || shotMode) return;
+    var raf = 0, tx = 0, ty = 0;
+    function apply() {
+      raf = 0;
+      card.style.setProperty('--rx', (-ty * 12.5).toFixed(2) + 'deg');
+      card.style.setProperty('--ry', (tx * 12.5).toFixed(2) + 'deg');
+      card.style.setProperty('--mx', (tx * 24).toFixed(1));
+      card.style.setProperty('--my', (ty * 24).toFixed(1));
+      card.style.setProperty('--tx', (tx * 9).toFixed(1) + 'px');
+      card.style.setProperty('--ty', (ty * 9).toFixed(1) + 'px');
+      card.style.setProperty('--ang', (tx * 22).toFixed(1) + 'deg');
+    }
+    stage.addEventListener('pointermove', function (e) {
+      var r = portrait.getBoundingClientRect();
+      tx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width * 0.85)));
+      ty = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height * 0.85)));
+      if (!raf) raf = requestAnimationFrame(apply);
+    });
+    stage.addEventListener('pointerleave', function () {
+      tx = 0; ty = 0;
+      if (!raf) raf = requestAnimationFrame(apply);
+    });
+    portrait.addEventListener('click', function () { go(1); });
+  })();
+
+  /* ---------------- 封面 → Agenda：翻卡 ---------------- */
+  function flipForwards() {
+    var from = slides[0], to = slides[1];
+    var ill = document.getElementById('agendaCard');
+    var fr = portrait.getBoundingClientRect();
+    var tr = ill.getBoundingClientRect();
+    var sr = stage.getBoundingClientRect();
+
+    var el = document.createElement('div');
+    el.className = 'flipcard';
+    el.style.cssText = 'left:' + fr.left + 'px;top:' + fr.top + 'px;width:' + fr.width + 'px;height:' + fr.height + 'px';
+    el.innerHTML =
+      '<div class="flip-inner">' +
+        '<div class="flip-face"><img src="assets/photo.jpg" alt=""></div>' +
+        '<div class="flip-face flip-back"><img src="assets/illustration.png" alt=""></div>' +
+      '</div>';
+    document.body.appendChild(el);
+
+    card.style.visibility = 'hidden';
+    ill.style.opacity = '0';
+
+    /* 放大到满屏时多留 12%，避免边缘露底 */
+    var cw = sr.width * 1.12, ch = sr.height * 1.12;
+    var cl = sr.left + (sr.width - cw) / 2, ct = sr.top + (sr.height - ch) / 2;
+
+    var inner = el.querySelector('.flip-inner');
+    inner.animate(
+      [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(180deg)' }],
+      { duration: 620 * D, easing: 'cubic-bezier(.55,.03,.25,1)', fill: 'forwards' }
+    );
+
+    el.animate([
+      { left: fr.left + 'px', top: fr.top + 'px', width: fr.width + 'px', height: fr.height + 'px', offset: 0 },
+      { left: cl + 'px', top: ct + 'px', width: cw + 'px', height: ch + 'px', offset: .48 },
+      { left: cl + 'px', top: ct + 'px', width: cw + 'px', height: ch + 'px', offset: .60 },
+      { left: tr.left + 'px', top: tr.top + 'px', width: tr.width + 'px', height: tr.height + 'px', offset: 1 }
+    ], { duration: 1150 * D, easing: 'cubic-bezier(.62,.02,.36,1)', fill: 'forwards' });
+
+    /* 卡片满屏遮住画面时瞬间换页：不加淡入淡出，杜绝白闪 */
+    from.classList.add('nofade');
+    to.classList.add('nofade');
+    setTimeout(function () {
+      to.classList.add('on');
+      from.classList.remove('on');
+      activate(1, { reveal: false });
+    }, 660 * D);
+
+    setTimeout(function () {
+      el.style.transition = 'opacity .26s ease';
+      el.style.opacity = '0';
+      ill.style.transition = 'opacity .3s ease';
+      ill.style.opacity = '1';
+      reveal(1);
+    }, 1110 * D);
+
+    setTimeout(function () {
+      el.remove();
+      card.style.visibility = '';
+      ill.style.transition = '';
+      ill.style.opacity = '';
+      from.classList.remove('nofade');
+      to.classList.remove('nofade');
+      busy = false;
+    }, 1420 * D);
+  }
+
+  /* ---------------- Agenda 小卡 → Thank you：翻卡 ---------------- */
+  function flipToProgram() {
+    var from = slides[1], to = slides[6];
+    var ill = document.getElementById('agendaCard');
+    var fr = ill.getBoundingClientRect();
+    var sr = stage.getBoundingClientRect();
+
+    var el = document.createElement('div');
+    el.className = 'flipcard';
+    el.style.cssText = 'left:' + fr.left + 'px;top:' + fr.top + 'px;width:' + fr.width + 'px;height:' + fr.height + 'px';
+    el.innerHTML =
+      '<div class="flip-inner">' +
+        '<div class="flip-face"><img src="assets/illustration.png" alt=""></div>' +
+        '<div class="flip-face flip-back" style="background:linear-gradient(160deg,#ffffff,#eaf4ff)"></div>' +
+      '</div>';
+    document.body.appendChild(el);
+
+    ill.style.opacity = '0';
+
+    var cw = sr.width * 1.12, ch = sr.height * 1.12;
+    var cl = sr.left + (sr.width - cw) / 2, ct = sr.top + (sr.height - ch) / 2;
+
+    el.querySelector('.flip-inner').animate(
+      [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(180deg)' }],
+      { duration: 620 * D, easing: 'cubic-bezier(.55,.03,.25,1)', fill: 'forwards' }
+    );
+
+    /* 只放大不回缩：卡片铺满画面后整页换成 Thank you */
+    el.animate([
+      { left: fr.left + 'px', top: fr.top + 'px', width: fr.width + 'px', height: fr.height + 'px', offset: 0 },
+      { left: cl + 'px', top: ct + 'px', width: cw + 'px', height: ch + 'px', offset: .52 },
+      { left: cl + 'px', top: ct + 'px', width: cw + 'px', height: ch + 'px', offset: 1 }
+    ], { duration: 900 * D, easing: 'cubic-bezier(.6,.02,.35,1)', fill: 'forwards' });
+
+    from.classList.add('nofade');
+    to.classList.add('nofade');
+
+    setTimeout(function () {
+      to.classList.add('on');
+      from.classList.remove('on');
+      activate(6, { reveal: false });
+    }, 640 * D);
+
+    setTimeout(function () {
+      el.style.transition = 'opacity .34s ease';
+      el.style.opacity = '0';
+      reveal(6);
+    }, 960 * D);
+
+    setTimeout(function () {
+      el.remove();
+      ill.style.transition = '';
+      ill.style.opacity = '';
+      from.classList.remove('nofade');
+      to.classList.remove('nofade');
+      busy = false;
+    }, 1340 * D);
+  }
+
+  /* ---------------- 研究计划 → Thank you：内容快速淡出 + 字样浮现 + 光晕外扩 ---------------- */
+  var halo = document.getElementById('halo');
+
+  function resetKids(sec) {
+    Array.prototype.forEach.call(sec.children, function (c) {
+      c.style.transition = 'none';
+      c.style.opacity = '';
+      c.style.transform = '';
+      void c.offsetWidth;
+      c.style.transition = '';
+    });
+  }
+
+  function programToThanks() {
+    var from = slides[6], to = slides[7];
+
+    footBar.getAnimations().forEach(function (a) { a.cancel(); });
+    footBar.style.display = 'block';
+    footBar.style.opacity = '0';
+
+    Array.prototype.forEach.call(from.children, function (c) {
+      c.style.transition = 'opacity ' + (420 * D) + 'ms ease, transform ' + (420 * D) + 'ms ease';
+      c.style.opacity = '0';
+      c.style.transform = 'scale(.985)';
+    });
+
+    from.classList.add('nofade');
+    to.classList.add('nofade');
+
+    setTimeout(function () {
+      activate(7, { reveal: false });
+      updateUI(7);
+
+      var title = to.querySelector('.txt');
+
+      if (title) {
+        title.animate([
+          { opacity: 0, transform: 'scale(.84)' },
+          { opacity: 1, transform: 'scale(1)' }
+        ], { duration: 860 * D, easing: 'cubic-bezier(.18,.72,.2,1)', fill: 'both' });
+      }
+      footBar.getAnimations().forEach(function (a) { a.cancel(); });
+      footBar.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 560 * D, easing: 'ease-out', fill: 'both' });
+
+      var disc = halo.querySelector('.disc');
+      var ring = halo.querySelector('.ring');
+      halo.getAnimations().forEach(function (a) { a.cancel(); });
+      [disc, ring].forEach(function (el2) {
+        el2.getAnimations().forEach(function (a) { a.cancel(); });
+      });
+
+      disc.animate([
+        { transform: 'scale(.06)', opacity: 0 },
+        { transform: 'scale(.72)', opacity: .74, offset: .18 },
+        { transform: 'scale(1.38)', opacity: .46, offset: .5 },
+        { transform: 'scale(2.02)', opacity: .18, offset: .78 },
+        { transform: 'scale(2.6)', opacity: 0 }
+      ], { duration: 1700 * D, easing: 'linear', fill: 'both' });
+
+      ring.animate([
+        { transform: 'scale(.06)', opacity: 0 },
+        { transform: 'scale(.79)', opacity: .6, offset: .18 },
+        { transform: 'scale(1.53)', opacity: .4, offset: .5 },
+        { transform: 'scale(2.27)', opacity: .16, offset: .78 },
+        { transform: 'scale(3.0)', opacity: 0 }
+      ], { duration: 1750 * D, easing: 'linear', fill: 'both' });
+    }, 380 * D);
+
+    setTimeout(function () {
+      resetKids(from);
+      from.classList.remove('nofade');
+      to.classList.remove('nofade');
+      busy = false;
+    }, 1960 * D);
+  }
+
+  /* ---------------- Thank you → Q & A：光晕收缩回中心 ---------------- */
+  var haloQ = document.getElementById('haloQ');
+  var footBar = document.getElementById('footBar');
+
+  function thanksToQA() {
+    var from = slides[7], to = slides[8];
+
+    footBar.getAnimations().forEach(function (a) { a.cancel(); });
+    footBar.style.transition = 'none';
+    footBar.style.display = 'block';
+    footBar.style.opacity = '1';
+
+    Array.prototype.forEach.call(from.children, function (c) {
+      if (c.classList.contains('foot')) return;
+      c.style.transition = 'opacity ' + (520 * D) + 'ms ease';
+      c.style.opacity = '0';
+    });
+
+    haloQ.getAnimations().forEach(function (a) { a.cancel(); });
+    haloQ.style.opacity = '0';
+    haloQ.animate([
+      { transform: 'scale(2.85)', opacity: 0 },
+      { transform: 'scale(2.16)', opacity: .66, offset: .22 },
+      { transform: 'scale(1.5)', opacity: .52, offset: .46 },
+      { transform: 'scale(1.0)', opacity: .34, offset: .72 },
+      { transform: 'scale(.58)', opacity: 0 }
+    ], { duration: 1200 * D, easing: 'linear', fill: 'both' });
+
+    from.classList.add('nofade');
+    to.classList.add('nofade');
+
+    Array.prototype.forEach.call(to.children, function (c) {
+      if (c.classList.contains('foot')) return;
+      c.style.transition = 'none';
+      c.style.opacity = '0';
+      void c.offsetWidth;
+    });
+
+    setTimeout(function () {
+      activate(8, { reveal: false });
+      updateUI(8);
+      Array.prototype.forEach.call(to.children, function (c) {
+        if (c.classList.contains('foot')) return;
+        c.style.transition = 'opacity ' + (540 * D) + 'ms ease';
+        c.style.opacity = '';
+      });
+    }, 640 * D);
+
+    setTimeout(function () {
+      resetKids(from);
+      from.classList.remove('nofade');
+      to.classList.remove('nofade');
+      busy = false;
+    }, 1320 * D);
+  }
+
+  function reveal(n) {
+    var s = slides[n];
+    s.classList.remove('revealing');
+    void s.offsetWidth;
+    s.classList.add('revealing');
+    if (n === 1) {
+      Array.prototype.forEach.call(s.querySelectorAll('.bubble'), function (b, i) {
+        b.animate([
+          { transform: 'scale(.62)', opacity: 0 },
+          { transform: 'scale(1)', opacity: 1 }
+        ], { duration: 680, delay: 70 * i, easing: 'cubic-bezier(.18,.9,.28,1.06)', fill: 'backwards' });
+      });
+    }
+  }
+
+  /* ---------------- Agenda → 详情：气泡消融成光晕 ---------------- */
+  function bubbleForwards(n) {
+    var target = slides[n];
+    var head = target.querySelector('.back');
+    var bubble = document.querySelector('.bubble[data-go="' + target.id + '"]');
+    var glow = target.querySelector('.page-glow');
+    if (!head || !bubble) { activate(n, { reveal: true }); busy = false; return; }
+
+    /* 目标页标题先隐身，并临时取消滑页的 1.008 缩放，量到“已上场”时的真实字形位置 */
+    head.style.animation = 'none';
+    head.style.filter = 'none';
+    head.style.transform = 'none';
+    head.style.transition = 'none';
+    head.style.opacity = '0';
+    frozenHead = head;
+
+    var keepTr = target.style.transition;
+    target.style.transition = 'none';
+    target.style.transform = 'none';
+    void target.offsetWidth;
+
+    var br = bubble.getBoundingClientRect();
+    var hr = textRect(head);
+    var bcx = br.left + br.width / 2, bcy = br.top + br.height / 2;
+    var hcx = hr.left + hr.width / 2, hcy = hr.top + hr.height / 2;
+    var headColor = getComputedStyle(head).color;
+    var label = (bubble.querySelector('span') || {}).textContent || '';
+
+    target.style.transition = keepTr;
+    target.style.transform = '';
+
+    morph.classList.add('on');
+    fill.style.background = '#19213d';
+    fill.style.clipPath = 'circle(0px at ' + bcx + 'px ' + bcy + 'px)';
+    fill.style.opacity = '1';
+
+    mBubble.style.cssText =
+      'left:' + br.left + 'px;top:' + br.top + 'px;width:' + br.width + 'px;height:' + br.height + 'px';
+    mLabel.style.cssText =
+      'left:' + bcx + 'px;top:' + bcy + 'px;font-size:' + (48 * scaleNow) + 'px;' +
+      'line-height:' + hr.height + 'px;font-weight:900;font-style:italic;color:#1d3350';
+    mLabel.textContent = label;
+
+    if (glow) { glow.style.transition = 'none'; glow.style.opacity = '0'; }
+
+    var R = Math.hypot(Math.max(bcx, window.innerWidth - bcx), Math.max(bcy, window.innerHeight - bcy)) * 1.1;
+
+    fill.getAnimations().forEach(function (a) { a.cancel(); });
+    fill.animate([
+      { clipPath: 'circle(0px at ' + bcx + 'px ' + bcy + 'px)' },
+      { clipPath: 'circle(' + R + 'px at ' + bcx + 'px ' + bcy + 'px)' }
+    ], { duration: 520 * D, easing: 'cubic-bezier(.55,.02,.3,1)', fill: 'forwards' });
+
+    /* 气泡本体：贴着文字向标题位置收束，边飞边模糊，最后化成左上角光晕 */
+    mBubble.getAnimations().forEach(function (a) { a.cancel(); });
+    mBubble.animate([
+      { transform: 'translate(0,0) scale(1)', filter: 'blur(0px)', opacity: 1, offset: 0 },
+      { transform: 'translate(' + (hcx - bcx) * .68 + 'px,' + (hcy - bcy) * .68 + 'px) scale(.66)', filter: 'blur(10px)', opacity: .92, offset: .6 },
+      { transform: 'translate(' + (hcx - bcx) + 'px,' + (hcy - bcy) + 'px) scale(.55)', filter: 'blur(30px)', opacity: .4, offset: 1 }
+    ], { duration: 780 * D, easing: 'cubic-bezier(.3,.72,.25,1)', fill: 'forwards' });
+
+    mLabel.getAnimations().forEach(function (a) { a.cancel(); });
+    mLabel.animate([
+      { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, color: '#1d3350', offset: 0 },
+      { transform: 'translate(calc(-50% + ' + (hcx - bcx) * .6 + 'px),calc(-50% + ' + (hcy - bcy) * .6 + 'px)) scale(1)', opacity: 1, color: '#8fa2c4', offset: .55 },
+      { transform: 'translate(calc(-50% + ' + (hcx - bcx) + 'px),calc(-50% + ' + (hcy - bcy) + 'px)) scale(1)', opacity: 1, color: headColor, offset: 1 }
+    ], { duration: 600 * D, easing: 'cubic-bezier(.3,.72,.25,1)', fill: 'forwards' });
+
+    setTimeout(function () { activate(n, { reveal: false }); }, 360 * D);
+
+    setTimeout(function () {
+      reveal(n);
+      if (glow) {
+        glow.style.transition = 'opacity .9s ease';
+        glow.style.opacity = '1';
+      }
+    }, 420 * D);
+
+    setTimeout(function () {
+      fill.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320 * D, easing: 'ease-out', fill: 'forwards' });
+    }, 560 * D);
+
+    setTimeout(function () {
+      mLabel.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200 * D, easing: 'ease-out', fill: 'forwards' });
+      mBubble.animate([{ opacity: .45 }, { opacity: 0 }], { duration: 260 * D, easing: 'ease-out', fill: 'forwards' });
+      head.style.transition = 'opacity .18s linear';
+      head.style.opacity = '1';
+    }, 620 * D);
+
+    setTimeout(cleanupMorph, 980 * D);
+  }
+
+  function bubbleBackwards(from) {
+    var target = slides[1];
+    var head = from.querySelector('.back');
+    var bubble = document.querySelector('.bubble[data-go="' + from.id + '"]');
+    if (!head || !bubble) { activate(1, { reveal: true }); busy = false; return; }
+
+    /* 冻结 Agenda 气泡漂浮，回溯文字才能与气泡严格重合 */
+    slides[1].classList.add('pin');
+    var keepTr1 = slides[1].style.transform;
+    slides[1].style.transition = 'none';
+    slides[1].style.transform = 'none';
+    void slides[1].offsetWidth;
+
+    var br = bubble.getBoundingClientRect();
+    var hr = textRect(head);
+    slides[1].style.transition = '';
+    slides[1].style.transform = keepTr1;
+    var bcx = br.left + br.width / 2, bcy = br.top + br.height / 2;
+    var hcx = hr.left + hr.width / 2, hcy = hr.top + hr.height / 2;
+    var headColor = getComputedStyle(head).color;
+
+    head.style.animation = 'none';
+    head.style.filter = 'none';
+    head.style.transform = 'none';
+    head.style.opacity = '0';
+    frozenHead = head;
+
+    morph.classList.add('on');
+    fill.style.background = '#ffffff';
+    fill.style.clipPath = 'circle(0px at ' + bcx + 'px ' + bcy + 'px)';
+    fill.style.opacity = '1';
+
+    mBubble.style.cssText =
+      'left:' + br.left + 'px;top:' + br.top + 'px;width:' + br.width + 'px;height:' + br.height + 'px';
+    mLabel.style.cssText =
+      'left:' + hcx + 'px;top:' + hcy + 'px;font-size:' + (48 * scaleNow) + 'px;' +
+      'line-height:' + hr.height + 'px;font-weight:900;font-style:italic;color:' + headColor;
+    mLabel.textContent = (bubble.querySelector('span') || {}).textContent || '';
+
+    var R = Math.hypot(Math.max(bcx, window.innerWidth - bcx), Math.max(bcy, window.innerHeight - bcy)) * 1.1;
+
+    fill.getAnimations().forEach(function (a) { a.cancel(); });
+    fill.animate([
+      { clipPath: 'circle(0px at ' + bcx + 'px ' + bcy + 'px)' },
+      { clipPath: 'circle(' + R + 'px at ' + bcx + 'px ' + bcy + 'px)' }
+    ], { duration: 520 * D, easing: 'cubic-bezier(.55,.02,.3,1)', fill: 'forwards' });
+
+    /* 光晕 → 气泡：从标题位置长回气泡，逐渐去模糊 */
+    mBubble.getAnimations().forEach(function (a) { a.cancel(); });
+    mBubble.animate([
+      { transform: 'translate(' + (hcx - bcx) + 'px,' + (hcy - bcy) + 'px) scale(.55)', filter: 'blur(30px)', opacity: .4, offset: 0 },
+      { transform: 'translate(0,0) scale(1)', filter: 'blur(0px)', opacity: 1, offset: .78 },
+      { transform: 'translate(0,0) scale(1)', filter: 'blur(0px)', opacity: 0, offset: 1 }
+    ], { duration: 820 * D, easing: 'cubic-bezier(.3,.72,.25,1)', fill: 'forwards' });
+
+    mLabel.getAnimations().forEach(function (a) { a.cancel(); });
+    mLabel.animate([
+      { transform: 'translate(-50%,-50%) scale(1)', opacity: 1, color: headColor, offset: 0 },
+      { transform: 'translate(calc(-50% + ' + (bcx - hcx) * .6 + 'px),calc(-50% + ' + (bcy - hcy) * .6 + 'px)) scale(1)', opacity: 1, color: '#8fa2c4', offset: .55 },
+      { transform: 'translate(calc(-50% + ' + (bcx - hcx) + 'px),calc(-50% + ' + (bcy - hcy) + 'px)) scale(1)', opacity: 1, color: '#1d3350', offset: 1 }
+    ], { duration: 700 * D, easing: 'cubic-bezier(.3,.72,.25,1)', fill: 'forwards' });
+
+    setTimeout(function () {
+      activate(1, { reveal: true });
+      Array.prototype.forEach.call(slides[1].querySelectorAll('.bubble'), function (b) {
+        b.style.transition = 'opacity .32s ease, filter .32s ease';
+        b.style.transitionDelay = '0s';
+        b.style.opacity = '1';
+        b.style.filter = 'none';
+      });
+    }, 340 * D);
+
+    setTimeout(function () {
+      fill.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 340 * D, easing: 'ease-out', fill: 'forwards' });
+    }, 540 * D);
+
+    setTimeout(cleanupMorph, 960 * D);
+  }
+
+  function cleanupMorph() {
+    morph.classList.remove('on');
+    fill.getAnimations().forEach(function (a) { a.cancel(); });
+    mBubble.getAnimations().forEach(function (a) { a.cancel(); });
+    mLabel.getAnimations().forEach(function (a) { a.cancel(); });
+    fill.removeAttribute('style');
+    mBubble.removeAttribute('style');
+    mLabel.removeAttribute('style');
+    mLabel.textContent = '';
+    if (frozenHead) {
+      frozenHead.style.transition = '';
+      frozenHead.style.opacity = '1';
+      frozenHead.style.filter = 'none';
+      frozenHead.style.transform = 'none';
+      frozenHead = null;
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.bubble'), function (b) {
+      b.style.transition = ''; b.style.transitionDelay = '';
+      b.style.opacity = ''; b.style.filter = '';
+    });
+    slides[1].classList.remove('pin');
+    slides[1].style.transform = '';
+    Array.prototype.forEach.call(document.querySelectorAll('.page-glow'), function (g) {
+      g.style.transition = '';
+      g.style.opacity = '';
+    });
+    busy = false;
+  }
+
+  /* ---------------- 点击交互 ---------------- */
+  document.querySelectorAll('.bubble').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var n = byId[b.getAttribute('data-go')];
+      if (typeof n === 'number') go(n);
+    });
+  });
+
+  var agendaCardEl = document.getElementById('agendaCard');
+  if (agendaCardEl) agendaCardEl.addEventListener('click', function () { go(6); });
+  document.querySelectorAll('.back').forEach(function (h) {
+    h.addEventListener('click', function () { go(1); });
+  });
+
+  /* ---------------- 初始 ---------------- */
+  function initial(n) {
+    idx = n;
+    activate(n, { reveal: !shotMode });
+    updateUI(n);
+  }
+
+  if (pm) {
+    initial(Math.max(0, Math.min(slides.length - 1, parseInt(pm[1], 10) - 1)));
+  } else {
+    var hm = /^#s(\d+)$/.exec(location.hash);
+    initial(hm ? Math.max(0, Math.min(slides.length - 1, parseInt(hm[1], 10) - 1)) : 0);
+  }
+
+  orbitCollect();
+  orbitPaint(0);
+
+  window.addEventListener('hashchange', function () {
+    var m = /^#s(\d+)$/.exec(location.hash);
+    if (!m) return;
+    var n = Math.max(0, Math.min(slides.length - 1, parseInt(m[1], 10) - 1));
+    if (n !== idx && !busy) go(n);
+  });
+})();
+</script>
+</body>
+</html>
